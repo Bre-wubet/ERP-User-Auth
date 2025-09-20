@@ -22,6 +22,7 @@ class JWTUtils {
       userId: payload.id,
       email: payload.email,
       roleId: payload.roleId,
+      roleName: payload.role?.name || null,
       type: 'access'
     };
 

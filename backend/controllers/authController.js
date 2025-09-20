@@ -10,11 +10,6 @@ import { logger } from '../utils/logger.js';
  * Handles user authentication, registration, and password management
  */
 
-/**
- * Register a new user
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const register = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -50,11 +45,6 @@ export const register = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Login user
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const login = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -99,11 +89,6 @@ export const login = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Refresh access token
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const refreshToken = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -122,11 +107,6 @@ export const refreshToken = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Logout user
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const logout = asyncHandler(async (req, res) => {
   const { sessionId } = req.body;
   const userId = req.user.id;
@@ -146,11 +126,6 @@ export const logout = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Logout all sessions
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const logoutAll = asyncHandler(async (req, res) => {
   const userId = req.user.id;
 
@@ -167,11 +142,6 @@ export const logoutAll = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Change password
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const changePassword = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -194,11 +164,6 @@ export const changePassword = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Initiate password reset
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const initiatePasswordReset = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -224,11 +189,6 @@ export const initiatePasswordReset = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Complete password reset
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const completePasswordReset = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -254,11 +214,6 @@ export const completePasswordReset = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Setup MFA
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const setupMFA = asyncHandler(async (req, res) => {
   const userId = req.user.id;
 
@@ -275,11 +230,6 @@ export const setupMFA = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Enable MFA
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const enableMFA = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -302,11 +252,6 @@ export const enableMFA = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Disable MFA
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const disableMFA = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -329,11 +274,6 @@ export const disableMFA = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Get current user profile
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const getProfile = asyncHandler(async (req, res) => {
   const userId = req.user.id;
 
@@ -346,11 +286,6 @@ export const getProfile = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Update user profile
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const updateProfile = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

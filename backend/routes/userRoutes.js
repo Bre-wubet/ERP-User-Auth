@@ -31,6 +31,17 @@ const router = express.Router();
 // All routes require authentication
 router.use(verifyToken);
 
+// Debug endpoint to check user role (remove in production)
+router.get('/debug/me', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      user: req.user,
+      canManageUsers: ['admin', 'manager', 'hr'].includes(req.user.role?.name)
+    }
+  });
+});
+
 // Get all users (admin/manager/hr only)
 router.get('/', 
   requireUserManagement,

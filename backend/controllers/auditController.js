@@ -8,11 +8,6 @@ import { logger } from '../utils/logger.js';
  * Handles audit logging and security tracking operations
  */
 
-/**
- * Get audit logs with pagination and filtering
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const getAuditLogs = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -53,11 +48,6 @@ export const getAuditLogs = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Get audit log by ID
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const getAuditLogById = asyncHandler(async (req, res) => {
   const { auditLogId } = req.params;
 
@@ -80,11 +70,6 @@ export const getAuditLogById = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Get audit logs for a specific user
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const getUserAuditLogs = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -127,11 +112,6 @@ export const getUserAuditLogs = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Get audit logs for a specific module
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const getModuleAuditLogs = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -172,11 +152,6 @@ export const getModuleAuditLogs = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Get audit statistics
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const getAuditStats = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -212,11 +187,6 @@ export const getAuditStats = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Search audit logs
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const searchAuditLogs = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -247,11 +217,6 @@ export const searchAuditLogs = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Get available modules
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const getAvailableModules = asyncHandler(async (req, res) => {
   try {
     const modules = await auditService.getAvailableModules();
@@ -263,11 +228,6 @@ export const getAvailableModules = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Get available actions
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const getAvailableActions = asyncHandler(async (req, res) => {
   try {
     const actions = await auditService.getAvailableActions();
@@ -279,11 +239,6 @@ export const getAvailableActions = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Clean up old audit logs
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const cleanupOldLogs = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -311,11 +266,6 @@ export const cleanupOldLogs = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Export audit logs
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const exportAuditLogs = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -382,11 +332,6 @@ export const exportAuditLogs = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Convert audit logs to CSV format
- * @param {Array} auditLogs - Audit logs array
- * @returns {string} CSV data
- */
 function convertToCSV(auditLogs) {
   if (auditLogs.length === 0) {
     return 'No data available';

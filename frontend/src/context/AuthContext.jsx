@@ -372,8 +372,22 @@ export const AuthProvider = ({ children }) => {
   // Check if user has permission
   const hasPermission = (permission) => {
     if (!state.user?.role) return false;
-    // Implement permission checking logic based on your backend
-    return true; // Placeholder
+    
+    // Define permission matrix based on roles
+    const permissions = {
+      admin: ['*'], // Admin has all permissions
+      manager: ['read:*', 'create:user', 'update:user', 'read:audit'],
+      hr: ['read:user', 'create:user', 'update:user'],
+      user: ['read:own', 'update:own']
+    };
+
+    const userRole = state.user.role.name;
+    const userPermissions = permissions[userRole] || [];
+    
+    // Check if user has permission
+    return userPermissions.includes('*') || 
+           userPermissions.includes(`${permission}:*`) ||
+           userPermissions.includes(permission);
   };
 
   // Context value

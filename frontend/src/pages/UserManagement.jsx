@@ -40,10 +40,17 @@ const UserManagement = () => {
   const [pageSize, setPageSize] = useState(10);
 
   const queryClient = useQueryClient();
-  const { hasRole } = useAuth();
+  const { hasRole, user } = useAuth();
 
   // Check if user has permission to manage users
   const canManageUsers = hasRole(['admin', 'manager', 'hr']);
+  
+  // Debug permission check
+  console.log('Permission Debug:', {
+    userRole: user?.role?.name,
+    canManageUsers,
+    hasRole: hasRole
+  });
 
   // Fetch users with filters (only if user has permission)
   const { data: usersData, isLoading: usersLoading, error: usersError } = useQuery({
@@ -65,9 +72,18 @@ const UserManagement = () => {
     enabled: canManageUsers, // Only fetch if user has permission
   });
 
-  const users = usersData?.data || [];
+  const users = Array.isArray(usersData?.data) ? usersData.data : [];
   const pagination = usersData?.pagination || {};
-  const roles = rolesData?.data || [];
+  const roles = Array.isArray(rolesData?.data) ? rolesData.data : [];
+
+  // Debug logging
+  console.log('UserManagement Debug:', {
+    usersData,
+    users,
+    usersLoading,
+    usersError,
+    canManageUsers
+  });
 
   // Create user mutation
   const createUserMutation = useMutation({
@@ -294,7 +310,7 @@ const UserManagement = () => {
               placeholder="Filter by role"
             >
               <option value="">All Roles</option>
-              {roles.map((role) => (
+              {Array.isArray(roles) && roles.map((role) => (
                 <option key={role.id} value={role.id}>
                   {role.name}
                 </option>
@@ -319,19 +335,25 @@ const UserManagement = () => {
 
       {/* Users Table */}
       <Card>
-        <Table
-          data={users}
-          columns={columns}
-          loading={usersLoading}
-          error={usersError}
-          pagination={{
-            current: currentPage,
-            total: pagination.totalPages || 0,
-            pageSize: pageSize,
-            onPageChange: setCurrentPage,
-            onPageSizeChange: setPageSize,
-          }}
-        />
+        {canManageUsers ? (
+          <Table
+            data={users}
+            columns={columns}
+            loading={usersLoading}
+            error={usersError}
+            pagination={{
+              current: currentPage,
+              total: pagination.totalPages || 0,
+              pageSize: pageSize,
+              onPageChange: setCurrentPage,
+              onPageSizeChange: setPageSize,
+            }}
+          />
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            Loading user data...
+          </div>
+        )}
       </Card>
 
       {/* Create User Modal */}
@@ -425,7 +447,7 @@ const CreateUserForm = ({ roles, onSubmit, onCancel, loading }) => {
         error={errors.roleId?.message}
       >
         <option value="">Select a role</option>
-        {roles.map((role) => (
+        {Array.isArray(roles) && roles.map((role) => (
           <option key={role.id} value={role.id}>
             {role.name}
           </option>
@@ -490,7 +512,7 @@ const EditUserForm = ({ user, roles, onSubmit, onCancel, loading }) => {
         error={errors.roleId?.message}
       >
         <option value="">Select a role</option>
-        {roles.map((role) => (
+        {Array.isArray(roles) && roles.map((role) => (
           <option key={role.id} value={role.id}>
             {role.name}
           </option>

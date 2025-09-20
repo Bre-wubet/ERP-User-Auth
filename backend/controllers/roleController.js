@@ -4,8 +4,6 @@ import { auditService } from '../services/auditService.js';
 import { sendSuccessResponse, sendErrorResponse, sendPaginatedResponse, asyncHandler } from '../middlewares/errorMiddleware.js';
 import { logger } from '../utils/logger.js';
 
-
-
 export const getRoles = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -38,7 +36,6 @@ export const getRoles = asyncHandler(async (req, res) => {
   }
 });
 
-
 export const getRoleById = asyncHandler(async (req, res) => {
   const { roleId } = req.params;
 
@@ -60,7 +57,6 @@ export const getRoleById = asyncHandler(async (req, res) => {
     sendErrorResponse(res, error.message, 404);
   }
 });
-
 
 export const createRole = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
@@ -92,7 +88,6 @@ export const createRole = asyncHandler(async (req, res) => {
     sendErrorResponse(res, error.message, 400);
   }
 });
-
 
 export const updateRole = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
@@ -126,7 +121,6 @@ export const updateRole = asyncHandler(async (req, res) => {
   }
 });
 
-
 export const deleteRole = asyncHandler(async (req, res) => {
   const { roleId } = req.params;
 
@@ -148,7 +142,6 @@ export const deleteRole = asyncHandler(async (req, res) => {
     sendErrorResponse(res, error.message, 400);
   }
 });
-
 
 export const assignRoleToUser = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
@@ -181,7 +174,6 @@ export const assignRoleToUser = asyncHandler(async (req, res) => {
   }
 });
 
-
 export const removeRoleFromUser = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -213,7 +205,6 @@ export const removeRoleFromUser = asyncHandler(async (req, res) => {
   }
 });
 
-
 export const getRoleStats = asyncHandler(async (req, res) => {
   try {
     const stats = await roleService.getRoleStats();
@@ -224,7 +215,6 @@ export const getRoleStats = asyncHandler(async (req, res) => {
     sendErrorResponse(res, error.message, 500);
   }
 });
-
 
 export const searchRoles = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
@@ -247,7 +237,6 @@ export const searchRoles = asyncHandler(async (req, res) => {
   }
 });
 
-
 export const getAvailableScopes = asyncHandler(async (req, res) => {
   try {
     const scopes = await roleService.getAvailableScopes();
@@ -258,7 +247,6 @@ export const getAvailableScopes = asyncHandler(async (req, res) => {
     sendErrorResponse(res, error.message, 500);
   }
 });
-
 
 export const checkUserRole = asyncHandler(async (req, res) => {
   const { userId, roleName } = req.params;
@@ -273,7 +261,6 @@ export const checkUserRole = asyncHandler(async (req, res) => {
   }
 });
 
-  
 export const checkUserRoleScope = asyncHandler(async (req, res) => {
   const { userId, scope } = req.params;
 

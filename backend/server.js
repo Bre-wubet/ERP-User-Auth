@@ -193,21 +193,18 @@ const startServer = async () => {
     
     // Start listening
     app.listen(PORT, () => {
-      logger.info(`🚀 ERP Auth Server started`, {
+      logger.info(`ERP Auth Server started`, {
         port: PORT,
         environment: NODE_ENV,
         timestamp: new Date().toISOString()
       });
       
       console.log(`
-╔══════════════════════════════════════════════════════════════╗
-║                    ERP AUTH SERVER                         ║
-╠══════════════════════════════════════════════════════════════╣
-║  🚀 Server running on port ${PORT}                              ║
-║  🌍 Environment: ${NODE_ENV.padEnd(20)} ║
-║  📊 Health check: http://localhost:${PORT}/health              ║
-║  📚 API docs: http://localhost:${PORT}/api                     ║
-╚══════════════════════════════════════════════════════════════╝
+        ERP AUTH SERVER   
+        Server running on port ${PORT}                             
+        Environment: ${NODE_ENV.padEnd(20)} 
+        Health check: http://localhost:${PORT}/health             
+        API docs: http://localhost:${PORT}/api                     
       `);
     });
   } catch (error) {

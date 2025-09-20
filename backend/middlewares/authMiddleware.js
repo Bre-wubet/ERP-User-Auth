@@ -44,11 +44,26 @@ export const verifyToken = async (req, res, next) => {
       });
     }
 
+    // Get user with role information from database
+    const { db } = await import('../config/db.js');
+    const user = await db.client.user.findUnique({
+      where: { id: decoded.userId },
+      include: { role: true }
+    });
+
+    if (!user || !user.isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not found or inactive'
+      });
+    }
+
     // Attach user info to request
     req.user = {
-      id: decoded.userId,
-      email: decoded.email,
-      roleId: decoded.roleId
+      id: user.id,
+      email: user.email,
+      roleId: user.roleId,
+      role: user.role || { name: decoded.roleName }
     };
 
     next();
@@ -100,7 +115,7 @@ export const verifySession = async (req, res, next) => {
       id: session.user.id,
       email: session.user.email,
       roleId: session.user.roleId,
-      role: session.user.role
+      role: session.user.role || { name: null }
     };
     req.session = session;
 

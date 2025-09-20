@@ -6,11 +6,6 @@ import { logger } from '../utils/logger.js';
  * Handles role and permission checking
  */
 
-/**
- * Check if user has specific role
- * @param {string|Array} roles - Required role(s)
- * @returns {Function} Middleware function
- */
 export const requireRole = (roles) => {
   return async (req, res, next) => {
     try {
@@ -21,7 +16,7 @@ export const requireRole = (roles) => {
         });
       }
 
-      const userRole = req.user.role?.name || req.user.role;
+      const userRole = req.user.role?.name || req.user.role || null;
       const requiredRoles = Array.isArray(roles) ? roles : [roles];
 
       if (!requiredRoles.includes(userRole)) {
@@ -56,11 +51,6 @@ export const requireRole = (roles) => {
   };
 };
 
-/**
- * Check if user has role in specific scope
- * @param {string} scope - Required scope
- * @returns {Function} Middleware function
- */
 export const requireScope = (scope) => {
   return async (req, res, next) => {
     try {
@@ -106,11 +96,6 @@ export const requireScope = (scope) => {
   };
 };
 
-/**
- * Check if user has any of the specified roles
- * @param {Array} roles - Array of allowed roles
- * @returns {Function} Middleware function
- */
 export const requireAnyRole = (roles) => {
   return async (req, res, next) => {
     try {
@@ -121,7 +106,7 @@ export const requireAnyRole = (roles) => {
         });
       }
 
-      const userRole = req.user.role?.name || req.user.role;
+      const userRole = req.user.role?.name || req.user.role || null;
 
       if (!roles.includes(userRole)) {
         logger.security('insufficient_role_any', req.user, {
@@ -155,12 +140,6 @@ export const requireAnyRole = (roles) => {
   };
 };
 
-/**
- * Check if user is admin
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Next middleware function
- */
 export const requireAdmin = async (req, res, next) => {
   try {
     if (!req.user) {
@@ -198,11 +177,6 @@ export const requireAdmin = async (req, res, next) => {
   }
 };
 
-/**
- * Check if user can access resource (owner or admin)
- * @param {string} resourceUserIdField - Field name containing user ID in request
- * @returns {Function} Middleware function
- */
 export const requireOwnerOrAdmin = (resourceUserIdField = 'userId') => {
   return async (req, res, next) => {
     try {
@@ -213,7 +187,7 @@ export const requireOwnerOrAdmin = (resourceUserIdField = 'userId') => {
         });
       }
 
-      const userRole = req.user.role?.name || req.user.role;
+      const userRole = req.user.role?.name || req.user.role || null;
       const resourceUserId = req.params[resourceUserIdField] || req.body[resourceUserIdField];
 
       // Admin can access everything
@@ -251,12 +225,6 @@ export const requireOwnerOrAdmin = (resourceUserIdField = 'userId') => {
   };
 };
 
-/**
- * Check if user can manage other users (admin or manager)
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Next middleware function
- */
 export const requireUserManagement = async (req, res, next) => {
   try {
     if (!req.user) {
@@ -266,18 +234,34 @@ export const requireUserManagement = async (req, res, next) => {
       });
     }
 
-    const userRole = req.user.role?.name || req.user.role;
+    const userRole = req.user.role?.name || req.user.role || null;
     const allowedRoles = ['admin', 'manager', 'hr'];
+
+    // Debug logging
+    logger.info('User management check', {
+      userId: req.user.id,
+      userRole,
+      allowedRoles,
+      userObject: req.user,
+      endpoint: req.path
+    });
 
     if (!allowedRoles.includes(userRole)) {
       logger.security('user_management_denied', req.user, {
         ip: req.ip,
-        endpoint: req.path
+        endpoint: req.path,
+        userRole,
+        allowedRoles
       });
 
       return res.status(403).json({
         success: false,
-        message: 'User management access required'
+        message: 'User management access required',
+        debug: {
+          userRole,
+          allowedRoles,
+          userObject: req.user
+        }
       });
     }
 
@@ -295,12 +279,6 @@ export const requireUserManagement = async (req, res, next) => {
   }
 };
 
-/**
- * Check if user can access audit logs (admin or auditor)
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Next middleware function
- */
 export const requireAuditAccess = async (req, res, next) => {
   try {
     if (!req.user) {
@@ -339,11 +317,6 @@ export const requireAuditAccess = async (req, res, next) => {
   }
 };
 
-/**
- * Dynamic role checking based on request parameters
- * @param {Function} roleChecker - Function that returns required role based on request
- * @returns {Function} Middleware function
- */
 export const requireDynamicRole = (roleChecker) => {
   return async (req, res, next) => {
     try {
@@ -355,7 +328,7 @@ export const requireDynamicRole = (roleChecker) => {
       }
 
       const requiredRole = roleChecker(req);
-      const userRole = req.user.role?.name || req.user.role;
+      const userRole = req.user.role?.name || req.user.role || null;
 
       if (userRole !== requiredRole) {
         logger.security('dynamic_role_check_failed', req.user, {
@@ -388,12 +361,6 @@ export const requireDynamicRole = (roleChecker) => {
   };
 };
 
-/**
- * Check if user has permission to perform action on resource
- * @param {string} action - Action to perform (create, read, update, delete)
- * @param {string} resource - Resource type
- * @returns {Function} Middleware function
- */
 export const requirePermission = (action, resource) => {
   return async (req, res, next) => {
     try {
@@ -404,7 +371,7 @@ export const requirePermission = (action, resource) => {
         });
       }
 
-      const userRole = req.user.role?.name || req.user.role;
+      const userRole = req.user.role?.name || req.user.role || null;
       
       // Define permission matrix (this would typically come from a database)
       const permissions = {

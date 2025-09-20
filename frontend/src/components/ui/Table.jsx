@@ -9,8 +9,99 @@ import { clsx } from 'clsx';
 const Table = ({
   children,
   className = '',
+  data = [],
+  columns = [],
+  loading = false,
+  error = null,
+  pagination = null,
   ...props
 }) => {
+  // If data and columns are provided, render a data table
+  if (data && columns && columns.length > 0 && Array.isArray(data)) {
+    return (
+      <div className="overflow-x-auto">
+        <table className={clsx('min-w-full divide-y divide-gray-200', className)} {...props}>
+          <TableHeader>
+            <TableRow>
+              {columns.map((column, index) => (
+                <TableHead key={column.key || index}>
+                  {column.label}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center py-8">
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                    <span className="ml-2 text-gray-600">Loading...</span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : error ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center py-8 text-red-600">
+                  Error: {error.message || 'Failed to load data'}
+                </TableCell>
+              </TableRow>
+            ) : data.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center py-8 text-gray-500">
+                  No data available
+                </TableCell>
+              </TableRow>
+            ) : (
+              data.map((row, rowIndex) => (
+                <TableRow key={row.id || rowIndex}>
+                  {columns.map((column, colIndex) => (
+                    <TableCell key={column.key || colIndex}>
+                      {column.render ? column.render(row) : row[column.key]}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </table>
+        {pagination && (
+          <TablePagination
+            currentPage={pagination.current}
+            totalPages={pagination.total}
+            totalItems={pagination.totalItems || 0}
+            itemsPerPage={pagination.pageSize}
+            onPageChange={pagination.onPageChange}
+            onItemsPerPageChange={pagination.onPageSizeChange}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // If data is provided but not an array, show error
+  if (data && !Array.isArray(data)) {
+    return (
+      <div className="overflow-x-auto">
+        <table className={clsx('min-w-full divide-y divide-gray-200', className)} {...props}>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Error</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell className="text-center py-8 text-red-600">
+                Invalid data format: Expected array but received {typeof data}
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </table>
+      </div>
+    );
+  }
+
+  // Default table rendering for custom content
   return (
     <div className="overflow-x-auto">
       <table className={clsx('min-w-full divide-y divide-gray-200', className)} {...props}>
