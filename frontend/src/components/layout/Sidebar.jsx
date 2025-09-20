@@ -46,14 +46,14 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
     },
     {
       name: 'Audit Logs',
-      href: '/audit',
+      href: '/audit-logs',
       icon: FileText,
       roles: ['admin', 'auditor'],
     },
     {
-      name: 'Settings',
-      href: '/settings',
-      icon: Settings,
+      name: 'Profile',
+      href: '/profile',
+      icon: User,
       roles: ['admin', 'manager', 'hr', 'user'],
     },
   ];

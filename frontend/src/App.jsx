@@ -16,6 +16,10 @@ import LoginForm from './components/auth/LoginForm';
 import RegisterForm from './components/auth/RegisterForm';
 import MFAForm from './components/auth/MFAForm';
 import Dashboard from './pages/Dashboard';
+import UserManagement from './pages/UserManagement';
+import RoleManagement from './pages/RoleManagement';
+import AuditLogs from './pages/AuditLogs';
+import ProfileSettings from './pages/ProfileSettings';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -74,26 +78,106 @@ function App() {
               <Route path="/register" element={<RegisterForm />} />
               <Route path="/mfa" element={<MFAForm />} />
               
-              {/* Protected Routes */}
-              <Route
-                path="/dashboard"
-                element={
-                  <PrivateRoute>
-                    <div className="flex h-screen">
-                      <Sidebar 
-                        isCollapsed={sidebarCollapsed} 
-                        onToggle={toggleSidebar} 
+                      {/* Protected Routes */}
+                      <Route
+                        path="/dashboard"
+                        element={
+                          <PrivateRoute>
+                            <div className="flex h-screen">
+                              <Sidebar
+                                isCollapsed={sidebarCollapsed}
+                                onToggle={toggleSidebar}
+                              />
+                              <div className="flex-1 flex flex-col overflow-hidden">
+                                <Navbar onMenuToggle={toggleSidebar} />
+                                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+                                  <Dashboard />
+                                </main>
+                              </div>
+                            </div>
+                          </PrivateRoute>
+                        }
                       />
-                      <div className="flex-1 flex flex-col overflow-hidden">
-                        <Navbar onMenuToggle={toggleSidebar} />
-                        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
-                          <Dashboard />
-                        </main>
-                      </div>
-                    </div>
-                  </PrivateRoute>
-                }
-              />
+
+                      <Route
+                        path="/users"
+                        element={
+                          <PrivateRoute>
+                            <div className="flex h-screen">
+                              <Sidebar
+                                isCollapsed={sidebarCollapsed}
+                                onToggle={toggleSidebar}
+                              />
+                              <div className="flex-1 flex flex-col overflow-hidden">
+                                <Navbar onMenuToggle={toggleSidebar} />
+                                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+                                  <UserManagement />
+                                </main>
+                              </div>
+                            </div>
+                          </PrivateRoute>
+                        }
+                      />
+
+                      <Route
+                        path="/roles"
+                        element={
+                          <PrivateRoute>
+                            <div className="flex h-screen">
+                              <Sidebar
+                                isCollapsed={sidebarCollapsed}
+                                onToggle={toggleSidebar}
+                              />
+                              <div className="flex-1 flex flex-col overflow-hidden">
+                                <Navbar onMenuToggle={toggleSidebar} />
+                                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+                                  <RoleManagement />
+                                </main>
+                              </div>
+                            </div>
+                          </PrivateRoute>
+                        }
+                      />
+
+                      <Route
+                        path="/audit-logs"
+                        element={
+                          <PrivateRoute>
+                            <div className="flex h-screen">
+                              <Sidebar
+                                isCollapsed={sidebarCollapsed}
+                                onToggle={toggleSidebar}
+                              />
+                              <div className="flex-1 flex flex-col overflow-hidden">
+                                <Navbar onMenuToggle={toggleSidebar} />
+                                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+                                  <AuditLogs />
+                                </main>
+                              </div>
+                            </div>
+                          </PrivateRoute>
+                        }
+                      />
+
+                      <Route
+                        path="/profile"
+                        element={
+                          <PrivateRoute>
+                            <div className="flex h-screen">
+                              <Sidebar
+                                isCollapsed={sidebarCollapsed}
+                                onToggle={toggleSidebar}
+                              />
+                              <div className="flex-1 flex flex-col overflow-hidden">
+                                <Navbar onMenuToggle={toggleSidebar} />
+                                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+                                  <ProfileSettings />
+                                </main>
+                              </div>
+                            </div>
+                          </PrivateRoute>
+                        }
+                      />
               
               {/* Default redirect */}
               <Route path="/" element={<Navigate to="/dashboard" replace />} />

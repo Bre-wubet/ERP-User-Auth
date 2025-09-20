@@ -4,16 +4,8 @@ import { auditService } from '../services/auditService.js';
 import { sendSuccessResponse, sendErrorResponse, sendPaginatedResponse, asyncHandler } from '../middlewares/errorMiddleware.js';
 import { logger } from '../utils/logger.js';
 
-/**
- * Role management controller
- * Handles role-based access control operations
- */
 
-/**
- * Get all roles with pagination and filtering
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
+
 export const getRoles = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -46,11 +38,7 @@ export const getRoles = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Get role by ID
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
+
 export const getRoleById = asyncHandler(async (req, res) => {
   const { roleId } = req.params;
 
@@ -73,11 +61,7 @@ export const getRoleById = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Create new role
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
+
 export const createRole = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -109,11 +93,7 @@ export const createRole = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Update role
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
+
 export const updateRole = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -146,11 +126,7 @@ export const updateRole = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Delete role
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
+
 export const deleteRole = asyncHandler(async (req, res) => {
   const { roleId } = req.params;
 
@@ -173,11 +149,7 @@ export const deleteRole = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Assign role to user
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
+
 export const assignRoleToUser = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -209,11 +181,7 @@ export const assignRoleToUser = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Remove role from user
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
+
 export const removeRoleFromUser = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -245,11 +213,7 @@ export const removeRoleFromUser = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Get role statistics
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
+
 export const getRoleStats = asyncHandler(async (req, res) => {
   try {
     const stats = await roleService.getRoleStats();
@@ -261,11 +225,7 @@ export const getRoleStats = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Search roles
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
+
 export const searchRoles = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -287,11 +247,7 @@ export const searchRoles = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Get available scopes
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
+
 export const getAvailableScopes = asyncHandler(async (req, res) => {
   try {
     const scopes = await roleService.getAvailableScopes();
@@ -303,11 +259,7 @@ export const getAvailableScopes = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Check if user has specific role
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
+
 export const checkUserRole = asyncHandler(async (req, res) => {
   const { userId, roleName } = req.params;
 
@@ -321,11 +273,7 @@ export const checkUserRole = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Check if user has role in specific scope
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
+  
 export const checkUserRoleScope = asyncHandler(async (req, res) => {
   const { userId, scope } = req.params;
 
@@ -400,20 +348,20 @@ export const updateRoleValidation = [
 
 export const assignRoleValidation = [
   body('userId')
-    .isUUID()
-    .withMessage('User ID must be a valid UUID'),
+    .isLength({ min: 1 })
+    .withMessage('User ID must be provided'),
   body('roleId')
-    .isUUID()
-    .withMessage('Role ID must be a valid UUID')
+    .isLength({ min: 1 })
+    .withMessage('Role ID must be provided')
 ];
 
 export const removeRoleValidation = [
   body('userId')
-    .isUUID()
-    .withMessage('User ID must be a valid UUID'),
+    .isLength({ min: 1 })
+    .withMessage('User ID must be provided'),
   body('defaultRoleId')
-    .isUUID()
-    .withMessage('Default role ID must be a valid UUID')
+    .isLength({ min: 1 })
+    .withMessage('Default role ID must be provided')
 ];
 
 export const searchRolesValidation = [

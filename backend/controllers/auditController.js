@@ -433,8 +433,8 @@ export const getAuditLogsValidation = [
     .withMessage('Limit must be between 1 and 1000'),
   query('userId')
     .optional()
-    .isUUID()
-    .withMessage('User ID must be a valid UUID'),
+    .isLength({ min: 1 })
+    .withMessage('User ID must be provided'),
   query('module')
     .optional()
     .trim()
@@ -563,8 +563,8 @@ export const cleanupOldLogsValidation = [
 export const exportAuditLogsValidation = [
   query('userId')
     .optional()
-    .isUUID()
-    .withMessage('User ID must be a valid UUID'),
+    .isLength({ min: 1 })
+    .withMessage('User ID must be provided'),
   query('module')
     .optional()
     .trim()

@@ -396,8 +396,8 @@ export const registerValidation = [
     .withMessage('Last name must be between 1 and 50 characters'),
   body('roleId')
     .optional()
-    .isUUID()
-    .withMessage('Role ID must be a valid UUID')
+    .isLength({ min: 1 })
+    .withMessage('Role ID must be provided')
 ];
 
 export const loginValidation = [

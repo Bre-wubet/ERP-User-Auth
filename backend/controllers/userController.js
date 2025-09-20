@@ -9,11 +9,6 @@ import { logger } from '../utils/logger.js';
  * Handles user CRUD operations and management
  */
 
-/**
- * Get all users with pagination and filtering
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const getUsers = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -48,11 +43,6 @@ export const getUsers = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Get user by ID
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const getUserById = asyncHandler(async (req, res) => {
   const { userId } = req.params;
 
@@ -75,11 +65,6 @@ export const getUserById = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Create new user
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const createUser = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -118,11 +103,6 @@ export const createUser = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Update user
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const updateUser = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -154,11 +134,6 @@ export const updateUser = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Delete user
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const deleteUser = asyncHandler(async (req, res) => {
   const { userId } = req.params;
 
@@ -181,11 +156,6 @@ export const deleteUser = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Activate user
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const activateUser = asyncHandler(async (req, res) => {
   const { userId } = req.params;
 
@@ -208,11 +178,6 @@ export const activateUser = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Deactivate user
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const deactivateUser = asyncHandler(async (req, res) => {
   const { userId } = req.params;
 
@@ -235,11 +200,6 @@ export const deactivateUser = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Get user sessions
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const getUserSessions = asyncHandler(async (req, res) => {
   const { userId } = req.params;
 
@@ -253,11 +213,6 @@ export const getUserSessions = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Revoke user session
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const revokeSession = asyncHandler(async (req, res) => {
   const { sessionId } = req.params;
 
@@ -280,11 +235,6 @@ export const revokeSession = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Revoke all user sessions
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const revokeAllSessions = asyncHandler(async (req, res) => {
   const { userId } = req.params;
 
@@ -307,11 +257,6 @@ export const revokeAllSessions = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Get user statistics
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const getUserStats = asyncHandler(async (req, res) => {
   const { userId } = req.params;
 
@@ -325,11 +270,6 @@ export const getUserStats = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * Search users
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- */
 export const searchUsers = asyncHandler(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -368,8 +308,8 @@ export const getUsersValidation = [
     .withMessage('Search term must be less than 100 characters'),
   query('roleId')
     .optional()
-    .isUUID()
-    .withMessage('Role ID must be a valid UUID'),
+    .isLength({ min: 1 })
+    .withMessage('Role ID must be provided'),
   query('isActive')
     .optional()
     .isBoolean()
@@ -403,8 +343,8 @@ export const createUserValidation = [
     .isLength({ min: 1, max: 50 })
     .withMessage('Last name must be between 1 and 50 characters'),
   body('roleId')
-    .isUUID()
-    .withMessage('Role ID must be a valid UUID'),
+    .isLength({ min: 1 })
+    .withMessage('Role ID must be provided'),
   body('isActive')
     .optional()
     .isBoolean()
@@ -429,8 +369,8 @@ export const updateUserValidation = [
     .withMessage('Last name must be between 1 and 50 characters'),
   body('roleId')
     .optional()
-    .isUUID()
-    .withMessage('Role ID must be a valid UUID'),
+    .isLength({ min: 1 })
+    .withMessage('Role ID must be provided'),
   body('isActive')
     .optional()
     .isBoolean()
@@ -449,6 +389,6 @@ export const searchUsersValidation = [
     .withMessage('Limit must be between 1 and 50'),
   query('roleId')
     .optional()
-    .isUUID()
-    .withMessage('Role ID must be a valid UUID')
+    .isLength({ min: 1 })
+    .withMessage('Role ID must be provided')
 ];
