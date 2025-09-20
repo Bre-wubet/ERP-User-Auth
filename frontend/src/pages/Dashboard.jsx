@@ -10,6 +10,7 @@ import {
   Clock,
   AlertTriangle,
   CheckCircle,
+  Info,
 } from 'lucide-react';
 
 /**
@@ -129,6 +130,51 @@ const Dashboard = () => {
           Here's what's happening with your ERP system today.
         </p>
       </div>
+
+      {/* Role Information */}
+      <Card>
+        <div className="flex items-start">
+          <Info className="h-6 w-6 text-blue-500 mr-3 mt-1" />
+          <div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Your Role & Permissions</h3>
+            <div className="space-y-2">
+              <p className="text-sm text-gray-600">
+                <strong>Current Role:</strong> <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">{user?.role?.name || 'No Role'}</span>
+              </p>
+              <p className="text-sm text-gray-600">
+                <strong>Available Features:</strong>
+              </p>
+              <ul className="text-sm text-gray-600 ml-4 space-y-1">
+                <li>• Dashboard - View system overview</li>
+                <li>• Profile - Manage your account settings</li>
+                {user?.role?.name === 'admin' && (
+                  <>
+                    <li>• User Management - Manage all users</li>
+                    <li>• Role Management - Manage roles and permissions</li>
+                    <li>• Audit Logs - View system activity logs</li>
+                  </>
+                )}
+                {user?.role?.name === 'manager' && (
+                  <>
+                    <li>• User Management - Manage users</li>
+                    <li>• Role Management - Manage roles</li>
+                  </>
+                )}
+                {user?.role?.name === 'hr' && (
+                  <>
+                    <li>• User Management - Manage users</li>
+                  </>
+                )}
+                {user?.role?.name === 'auditor' && (
+                  <>
+                    <li>• Audit Logs - View system activity logs</li>
+                  </>
+                )}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </Card>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -9,9 +9,11 @@ import {
   Calendar,
   User,
   Activity,
-  Eye
+  Eye,
+  AlertTriangle
 } from 'lucide-react';
 import { auditAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
@@ -37,7 +39,12 @@ const AuditLogs = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null);
 
-  // Fetch audit logs with filters
+  const { hasRole } = useAuth();
+
+  // Check if user has permission to view audit logs
+  const canViewAuditLogs = hasRole(['admin', 'auditor']);
+
+  // Fetch audit logs with filters (only if user has permission)
   const { data: auditData, isLoading: auditLoading, error: auditError } = useQuery({
     queryKey: ['audit-logs', currentPage, pageSize, searchQuery, selectedModule, selectedAction, selectedUser, dateFrom, dateTo],
     queryFn: () => auditAPI.getAuditLogs({
@@ -50,28 +57,32 @@ const AuditLogs = () => {
       dateFrom: dateFrom || undefined,
       dateTo: dateTo || undefined,
     }),
+    enabled: canViewAuditLogs, // Only fetch if user has permission
     keepPreviousData: true,
   });
 
-  // Fetch available modules
+  // Fetch available modules (only if user has permission)
   const { data: modulesData } = useQuery({
     queryKey: ['audit-modules'],
     queryFn: auditAPI.getAvailableModules,
+    enabled: canViewAuditLogs, // Only fetch if user has permission
   });
 
-  // Fetch available actions
+  // Fetch available actions (only if user has permission)
   const { data: actionsData } = useQuery({
     queryKey: ['audit-actions'],
     queryFn: auditAPI.getAvailableActions,
+    enabled: canViewAuditLogs, // Only fetch if user has permission
   });
 
-  // Fetch audit statistics
+  // Fetch audit statistics (only if user has permission)
   const { data: statsData } = useQuery({
     queryKey: ['audit-stats'],
     queryFn: () => auditAPI.getAuditStats({
       dateFrom: dateFrom || undefined,
       dateTo: dateTo || undefined,
     }),
+    enabled: canViewAuditLogs, // Only fetch if user has permission
   });
 
   const auditLogs = auditData?.data || [];
@@ -235,6 +246,33 @@ const AuditLogs = () => {
       ),
     },
   ];
+
+  // Show access denied if user doesn't have permission
+  if (!canViewAuditLogs) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Audit Logs</h1>
+            <p className="text-gray-600">Monitor system activities and user actions</p>
+          </div>
+        </div>
+        
+        <Card>
+          <div className="text-center py-12">
+            <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
+            <p className="text-gray-600 mb-4">
+              You don't have permission to access audit logs. This feature requires admin or auditor role.
+            </p>
+            <p className="text-sm text-gray-500">
+              Contact your administrator if you believe this is an error.
+            </p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

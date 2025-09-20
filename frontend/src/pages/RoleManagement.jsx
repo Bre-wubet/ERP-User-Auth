@@ -11,9 +11,11 @@ import {
   Filter,
   RefreshCw,
   UserPlus,
-  UserMinus
+  UserMinus,
+  AlertTriangle
 } from 'lucide-react';
 import { roleAPI, userAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Card from '../components/ui/Card';
@@ -36,8 +38,12 @@ const RoleManagement = () => {
   const [pageSize, setPageSize] = useState(10);
 
   const queryClient = useQueryClient();
+  const { hasRole } = useAuth();
 
-  // Fetch roles with filters
+  // Check if user has permission to manage roles
+  const canManageRoles = hasRole(['admin', 'manager']);
+
+  // Fetch roles with filters (only if user has permission)
   const { data: rolesData, isLoading: rolesLoading, error: rolesError } = useQuery({
     queryKey: ['roles', currentPage, pageSize, searchQuery],
     queryFn: () => roleAPI.getRoles({
@@ -45,13 +51,15 @@ const RoleManagement = () => {
       limit: pageSize,
       search: searchQuery
     }),
+    enabled: canManageRoles, // Only fetch if user has permission
     keepPreviousData: true,
   });
 
-  // Fetch users for assignment
+  // Fetch users for assignment (only if user has permission)
   const { data: usersData } = useQuery({
     queryKey: ['users-for-assignment'],
     queryFn: () => userAPI.getUsers({ limit: 100 }),
+    enabled: canManageRoles, // Only fetch if user has permission
   });
 
   const roles = rolesData?.data || [];
@@ -217,6 +225,33 @@ const RoleManagement = () => {
       ),
     },
   ];
+
+  // Show access denied if user doesn't have permission
+  if (!canManageRoles) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Role Management</h1>
+            <p className="text-gray-600">Manage roles, permissions, and user assignments</p>
+          </div>
+        </div>
+        
+        <Card>
+          <div className="text-center py-12">
+            <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
+            <p className="text-gray-600 mb-4">
+              You don't have permission to access role management. This feature requires admin or manager role.
+            </p>
+            <p className="text-sm text-gray-500">
+              Contact your administrator if you believe this is an error.
+            </p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
