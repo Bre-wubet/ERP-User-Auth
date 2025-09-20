@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String      @id @default(cuid())
+  email         String      @unique
+  password      String
+  firstName     String
+  lastName      String
+  isActive      Boolean     @default(true)
+  lastLogin     DateTime?
+  role          Role        @relation(fields: [roleId], references: [id])
+  roleId        String
+  mfaSecret     String?     // For MFA (TOTP secret, encrypted)
+  sessions      Session[]
+  auditLogs     AuditLog[]
+  apiTokens     ApiToken[]  // For service-to-service or external integrations
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Role {
+  id        String       @id @default(cuid())
+  name      String       @unique
+  scope     String?      // "global", "finance", "hr", etc.
+  users     User[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model Session {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  token      String    @unique
+  ip         String?
+  userAgent  String?   // Store device/browser info
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+}
+
+model AuditLog {
+  id        String    @id @default(cuid())
+  userId    String?
+  user      User?     @relation(fields: [userId], references: [id])
+  module    String    // e.g. "finance", "hr", "inventory"
+  action    String
+  details   Json?     // Store metadata (recordId, field changes, etc.)
+  ip        String?
+  createdAt DateTime  @default(now())
+}
+
+model ApiToken {
+  id         String    @id @default(cuid())
+  userId     String?
+  user       User?     @relation(fields: [userId], references: [id])
+  token      String    @unique
+  description String?
+  scopes     String[]  // ["read:finance", "write:hr"]
+  expiresAt  DateTime?
+  createdAt  DateTime  @default(now())
+}
