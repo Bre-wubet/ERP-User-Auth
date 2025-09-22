@@ -11,8 +11,12 @@ import {
   Save,
   Check,
   X,
-  AlertTriangle
+  AlertTriangle,
+  Mail,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { authAPI, userAPI } from '../services/api';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -117,6 +121,41 @@ const ProfileSettings = () => {
     },
   });
 
+  // Resend email verification mutation
+  const resendVerificationMutation = useMutation({
+    mutationFn: authAPI.resendEmailVerification,
+    onSuccess: () => {
+      toast.success('Verification email sent successfully');
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to send verification email');
+    },
+  });
+
+  // Revoke single session
+  const revokeSessionMutation = useMutation({
+    mutationFn: (sessionId) => userAPI.revokeSession(sessionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['user-sessions']);
+      toast.success('Session revoked');
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to revoke session');
+    },
+  });
+
+  // Logout all sessions for current user
+  const logoutAllSessionsMutation = useMutation({
+    mutationFn: () => authAPI.logoutAll(),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['user-sessions']);
+      toast.success('Logged out from all sessions');
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to logout all sessions');
+    },
+  });
+
   const handleUpdateProfile = (data) => {
     updateProfileMutation.mutate(data);
   };
@@ -137,6 +176,10 @@ const ProfileSettings = () => {
     if (window.confirm('Are you sure you want to disable MFA? This will reduce your account security.')) {
       disableMFAMutation.mutate({ token: '' });
     }
+  };
+
+  const handleResendVerification = () => {
+    resendVerificationMutation.mutate();
   };
 
   const tabs = [
@@ -186,7 +229,13 @@ const ProfileSettings = () => {
 
       {/* Profile Tab */}
       {activeTab === 'profile' && (
-        <ProfileTab user={user} onSubmit={handleUpdateProfile} loading={updateProfileMutation.isPending} />
+        <ProfileTab 
+          user={user} 
+          onSubmit={handleUpdateProfile} 
+          onResendVerification={handleResendVerification}
+          loading={updateProfileMutation.isPending}
+          resendLoading={resendVerificationMutation.isPending}
+        />
       )}
 
       {/* Security Tab */}
@@ -206,7 +255,13 @@ const ProfileSettings = () => {
 
       {/* Sessions Tab */}
       {activeTab === 'sessions' && (
-        <SessionsTab sessions={sessions} />
+        <SessionsTab 
+          sessions={sessions} 
+          onRevokeSession={(id) => revokeSessionMutation.mutate(id)}
+          onRevokeAll={() => logoutAllSessionsMutation.mutate()}
+          revokeLoading={revokeSessionMutation.isPending}
+          revokeAllLoading={logoutAllSessionsMutation.isPending}
+        />
       )}
 
       {/* Change Password Modal */}
@@ -249,7 +304,7 @@ const ProfileSettings = () => {
 };
 
 // Profile Tab Component
-const ProfileTab = ({ user, onSubmit, loading }) => {
+const ProfileTab = ({ user, onSubmit, onResendVerification, loading, resendLoading }) => {
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
       firstName: user?.firstName || '',
@@ -258,9 +313,14 @@ const ProfileTab = ({ user, onSubmit, loading }) => {
     }
   });
 
+  const onLocalSubmit = (data) => {
+    // Prevent email updates directly if unverified? Optional policy
+    onSubmit({ firstName: data.firstName.trim(), lastName: data.lastName.trim() });
+  };
+
   return (
     <Card>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onLocalSubmit)} className="space-y-6">
         <div>
           <h3 className="text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
           
@@ -278,18 +338,42 @@ const ProfileTab = ({ user, onSubmit, loading }) => {
           </div>
 
           <div className="mt-4">
-            <Input
-              label="Email Address"
-              type="email"
-              {...register('email', { 
-                required: 'Email is required',
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: 'Invalid email address'
-                }
-              })}
-              error={errors.email?.message}
-            />
+            <div className="flex items-center justify-between">
+              <Input
+                label="Email Address"
+                type="email"
+                {...register('email', { 
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: 'Invalid email address'
+                  }
+                })}
+                error={errors.email?.message}
+                className="flex-1"
+              />
+              <div className="ml-4 flex items-center">
+                {user?.emailVerified ? (
+                  <div className="flex items-center text-green-600">
+                    <CheckCircle className="h-5 w-5 mr-1" />
+                    <span className="text-sm font-medium">Verified</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center">
+                    <XCircle className="h-5 w-5 mr-1 text-red-500" />
+                    <span className="text-sm text-red-500 mr-2">Unverified</span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={onResendVerification}
+                      loading={resendLoading}
+                    >
+                      Verify
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -353,6 +437,7 @@ const SecurityTab = ({
 }) => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showMFAModal, setShowMFAModal] = useState(false);
+  const [passwordScore, setPasswordScore] = useState(0);
 
   return (
     <div className="space-y-6">
@@ -372,6 +457,23 @@ const SecurityTab = ({
           >
             Change Password
           </Button>
+        </div>
+        <div className="mt-4 bg-blue-50 border border-blue-200 rounded-md p-3 text-sm text-blue-800">
+          Use at least 12 characters with upper, lower, number and special characters. Avoid common words.
+        </div>
+        <div className="mt-4 flex items-center space-x-3">
+          <Link
+            to="/forgot-password"
+            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Forgot password
+          </Link>
+          <Link
+            to="/reset-password"
+            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Have a token? Reset here
+          </Link>
         </div>
       </Card>
 
@@ -434,7 +536,7 @@ const SecurityTab = ({
 };
 
 // Sessions Tab Component
-const SessionsTab = ({ sessions }) => {
+const SessionsTab = ({ sessions, onRevokeSession, onRevokeAll, revokeLoading, revokeAllLoading }) => {
   const [showPassword, setShowPassword] = useState({});
 
   const togglePasswordVisibility = (sessionId) => {
@@ -451,6 +553,20 @@ const SessionsTab = ({ sessions }) => {
         <p className="text-sm text-gray-500 mb-6">
           Manage your active sessions across different devices and browsers
         </p>
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-sm text-gray-600">
+            Total: {sessions.length}
+          </div>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={onRevokeAll}
+            loading={revokeAllLoading}
+            disabled={sessions.length === 0}
+          >
+            Revoke All Sessions
+          </Button>
+        </div>
 
         {sessions.length === 0 ? (
           <div className="text-center py-8">
@@ -488,10 +604,8 @@ const SessionsTab = ({ sessions }) => {
                     <Button
                       size="sm"
                       variant="destructive"
-                      onClick={() => {
-                        // Implement revoke session
-                        console.log('Revoke session:', session.id);
-                      }}
+                      onClick={() => onRevokeSession(session.id)}
+                      loading={revokeLoading}
                     >
                       Revoke
                     </Button>

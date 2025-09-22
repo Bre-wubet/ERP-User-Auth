@@ -176,7 +176,7 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: AUTH_ACTIONS.LOGIN_START });
       
       const response = await authAPI.login(credentials);
-      const { user, tokens, requiresMFA, userId } = response.data.data;
+      const { user, tokens, requiresMFA, userId, sessionId } = response.data.data;
 
       if (requiresMFA) {
         dispatch({
@@ -190,6 +190,9 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('accessToken', tokens.accessToken);
       localStorage.setItem('refreshToken', tokens.refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
+      if (sessionId) {
+        localStorage.setItem('sessionId', sessionId);
+      }
 
       dispatch({
         type: AUTH_ACTIONS.LOGIN_SUCCESS,
@@ -205,18 +208,18 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Complete MFA login
-  const completeMFALogin = async (mfaToken, userId) => {
+  const completeMFALogin = async (credentials, mfaToken) => {
     try {
-      const response = await authAPI.login({
-        ...credentials,
-        mfaToken,
-      });
-      const { user, tokens } = response.data.data;
+      const response = await authAPI.login({ ...credentials, mfaToken });
+      const { user, tokens, sessionId } = response.data.data;
 
       // Store tokens and user data
       localStorage.setItem('accessToken', tokens.accessToken);
       localStorage.setItem('refreshToken', tokens.refreshToken);
       localStorage.setItem('user', JSON.stringify(user));
+      if (sessionId) {
+        localStorage.setItem('sessionId', sessionId);
+      }
 
       dispatch({
         type: AUTH_ACTIONS.LOGIN_SUCCESS,
@@ -360,6 +363,28 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Verify email
+  const verifyEmail = async (token) => {
+    try {
+      await authAPI.verifyEmail(token);
+      toast.success('Email verified successfully');
+      return { success: true };
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  // Resend email verification
+  const resendEmailVerification = async () => {
+    try {
+      await authAPI.resendEmailVerification();
+      toast.success('Verification email sent successfully');
+      return { success: true };
+    } catch (error) {
+      throw error;
+    }
+  };
+
   // Check if user has role
   const hasRole = (requiredRoles) => {
     if (!state.user?.role) return false;
@@ -411,6 +436,8 @@ export const AuthProvider = ({ children }) => {
     setupMFA,
     enableMFA,
     disableMFA,
+    verifyEmail,
+    resendEmailVerification,
     hasRole,
     hasPermission,
   };

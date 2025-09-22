@@ -1,8 +1,10 @@
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { db } from '../config/db.js';
 import { jwtUtils } from '../utils/jwtUtils.js';
 import { mfaUtils } from '../utils/mfaUtils.js';
 import { logger } from '../utils/logger.js';
+import { emailService } from './emailService.js';
 
 /**
  * Authentication service
@@ -56,7 +58,8 @@ class AuthService {
           firstName,
           lastName,
           roleId: finalRoleId,
-          isActive: true
+          isActive: true,
+          emailVerified: false
         },
         include: {
           role: true
@@ -65,6 +68,16 @@ class AuthService {
 
       // Generate tokens
       const tokens = jwtUtils.generateTokenPair(user);
+
+      // Send welcome email
+      try {
+        await emailService.sendWelcomeEmail(user.email, `${user.firstName} ${user.lastName}`);
+      } catch (emailError) {
+        logger.warn('Failed to send welcome email', { 
+          error: emailError.message, 
+          userId: user.id 
+        });
+      }
 
       // Log registration
       logger.auth('user_registered', user, { ip: userData.ip });
@@ -273,7 +286,7 @@ class AuthService {
   /**
    * Reset password (forgot password flow)
    * @param {string} email - User email
-   * @returns {Promise<string>} Reset token
+   * @returns {Promise<string>} Success message
    */
   async initiatePasswordReset(email) {
     try {
@@ -282,28 +295,46 @@ class AuthService {
       });
 
       if (!user) {
-        // Don't reveal if user exists
-        return 'Password reset email sent';
+        // Don't reveal if user exists for security
+        return 'If an account with that email exists, a password reset link has been sent';
       }
 
-      // Generate reset token
-      const resetToken = jwtUtils.generateSecureToken();
+      if (!user.isActive) {
+        // Don't reveal if user is inactive
+        return 'If an account with that email exists, a password reset link has been sent';
+      }
+
+      // Generate secure reset token
+      const resetToken = crypto.randomBytes(32).toString('hex');
       const resetExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-      // Store reset token (you might want to create a separate table for this)
-      // For now, we'll use a simple approach
-      const resetData = {
-        token: resetToken,
-        expiresAt: resetExpiry,
-        userId: user.id
-      };
+      // Store reset token in database
+      await db.client.passwordResetToken.create({
+        data: {
+          userId: user.id,
+          token: resetToken,
+          expiresAt: resetExpiry
+        }
+      });
 
-      // In a real implementation, you'd store this in a database table
-      // and send an email with the reset link
+      // Send password reset email
+      try {
+        await emailService.sendPasswordResetEmail(
+          user.email, 
+          resetToken, 
+          `${user.firstName} ${user.lastName}`
+        );
+      } catch (emailError) {
+        logger.error('Failed to send password reset email', { 
+          error: emailError.message, 
+          userId: user.id 
+        });
+        throw new Error('Failed to send password reset email');
+      }
 
       logger.auth('password_reset_initiated', user);
 
-      return 'Password reset email sent';
+      return 'If an account with that email exists, a password reset link has been sent';
     } catch (error) {
       logger.error('Password reset initiation failed', { error: error.message, email });
       throw error;
@@ -318,18 +349,73 @@ class AuthService {
    */
   async completePasswordReset(resetToken, newPassword) {
     try {
-      // In a real implementation, you'd verify the reset token from the database
-      // For now, we'll simulate the process
+      // Find valid reset token
+      const resetTokenRecord = await db.client.passwordResetToken.findUnique({
+        where: { token: resetToken },
+        include: { user: true }
+      });
 
+      if (!resetTokenRecord) {
+        throw new Error('Invalid or expired reset token');
+      }
+
+      if (resetTokenRecord.used) {
+        throw new Error('Reset token has already been used');
+      }
+
+      if (resetTokenRecord.expiresAt < new Date()) {
+        // Clean up expired token
+        await db.client.passwordResetToken.delete({
+          where: { id: resetTokenRecord.id }
+        });
+        throw new Error('Reset token has expired');
+      }
+
+      // Hash new password
       const hashedPassword = await bcrypt.hash(newPassword, this.saltRounds);
 
-      // You would update the user's password here
-      // await db.client.user.update({...});
+      // Update user password
+      await db.client.user.update({
+        where: { id: resetTokenRecord.userId },
+        data: { password: hashedPassword }
+      });
 
-      logger.auth('password_reset_completed', { resetToken });
+      // Mark reset token as used
+      await db.client.passwordResetToken.update({
+        where: { id: resetTokenRecord.id },
+        data: { used: true }
+      });
 
-      // Logout all sessions
-      // await this.logoutAll(userId);
+      // Logout all sessions for security
+      await this.logoutAll(resetTokenRecord.userId);
+
+      // Send security alert email
+      try {
+        await emailService.sendSecurityAlertEmail(
+          resetTokenRecord.user.email,
+          `${resetTokenRecord.user.firstName} ${resetTokenRecord.user.lastName}`,
+          'Password Reset Completed',
+          {
+            timestamp: new Date().toISOString(),
+            ip: 'Unknown' // Could be passed from controller
+          }
+        );
+      } catch (emailError) {
+        logger.warn('Failed to send security alert email', { 
+          error: emailError.message, 
+          userId: resetTokenRecord.userId 
+        });
+      }
+
+      logger.auth('password_reset_completed', resetTokenRecord.user);
+
+      // Clean up old reset tokens for this user
+      await db.client.passwordResetToken.deleteMany({
+        where: {
+          userId: resetTokenRecord.userId,
+          used: true
+        }
+      });
     } catch (error) {
       logger.error('Password reset completion failed', { error: error.message });
       throw error;
@@ -388,6 +474,25 @@ class AuthService {
         where: { id: userId },
         data: { mfaSecret: secret }
       });
+
+      // Send MFA setup confirmation email
+      try {
+        const user = await db.client.user.findUnique({
+          where: { id: userId }
+        });
+        
+        if (user) {
+          await emailService.sendMFASetupEmail(
+            user.email,
+            `${user.firstName} ${user.lastName}`
+          );
+        }
+      } catch (emailError) {
+        logger.warn('Failed to send MFA setup email', { 
+          error: emailError.message, 
+          userId 
+        });
+      }
 
       logger.auth('mfa_enabled', { id: userId });
     } catch (error) {
@@ -488,6 +593,106 @@ class AuthService {
     } catch (error) {
       logger.error('Session verification failed', { error: error.message });
       throw error;
+    }
+  }
+
+  /**
+   * Verify email address
+   * @param {string} verificationToken - Email verification token
+   * @returns {Promise<void>}
+   */
+  async verifyEmail(verificationToken) {
+    try {
+      // In a real implementation, you'd have email verification tokens
+      // For now, we'll simulate the process
+      const decoded = jwtUtils.verifyToken(verificationToken);
+      
+      const user = await db.client.user.findUnique({
+        where: { id: decoded.userId }
+      });
+
+      if (!user) {
+        throw new Error('Invalid verification token');
+      }
+
+      // Update user email verification status
+      await db.client.user.update({
+        where: { id: user.id },
+        data: { emailVerified: true }
+      });
+
+      logger.auth('email_verified', user);
+    } catch (error) {
+      logger.error('Email verification failed', { error: error.message });
+      throw error;
+    }
+  }
+
+  /**
+   * Resend email verification
+   * @param {string} userId - User ID
+   * @returns {Promise<void>}
+   */
+  async resendEmailVerification(userId) {
+    try {
+      const user = await db.client.user.findUnique({
+        where: { id: userId }
+      });
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      if (user.emailVerified) {
+        throw new Error('Email is already verified');
+      }
+
+      // Generate verification token
+      const verificationToken = jwtUtils.generateToken({ userId: user.id }, '1h');
+
+      // Send verification email
+      try {
+        await emailService.sendAccountActivationEmail(
+          user.email,
+          `${user.firstName} ${user.lastName}`,
+          verificationToken
+        );
+      } catch (emailError) {
+        logger.error('Failed to send verification email', { 
+          error: emailError.message, 
+          userId 
+        });
+        throw new Error('Failed to send verification email');
+      }
+
+      logger.auth('email_verification_resent', user);
+    } catch (error) {
+      logger.error('Resend email verification failed', { error: error.message, userId });
+      throw error;
+    }
+  }
+
+  /**
+   * Clean up expired password reset tokens
+   * @returns {Promise<void>}
+   */
+  async cleanupExpiredResetTokens() {
+    try {
+      const result = await db.client.passwordResetToken.deleteMany({
+        where: {
+          expiresAt: {
+            lt: new Date()
+          }
+        }
+      });
+
+      logger.info('Cleaned up expired password reset tokens', { 
+        count: result.count 
+      });
+    } catch (error) {
+      logger.error('Failed to cleanup expired reset tokens', { 
+        error: error.message 
+      });
     }
   }
 

@@ -21,6 +21,7 @@ model User {
   firstName     String
   lastName      String
   isActive      Boolean     @default(true)
+  emailVerified Boolean     @default(false)
   lastLogin     DateTime?
   role          Role        @relation(fields: [roleId], references: [id])
   roleId        String
@@ -28,6 +29,7 @@ model User {
   sessions      Session[]
   auditLogs     AuditLog[]
   apiTokens     ApiToken[]  // For service-to-service or external integrations
+  passwordResetTokens PasswordResetToken[]
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 }
@@ -72,4 +74,14 @@ model ApiToken {
   scopes     String[]  // ["read:finance", "write:hr"]
   expiresAt  DateTime?
   createdAt  DateTime  @default(now())
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }

@@ -39,3 +39,197 @@
 {"timestamp":"2025-09-22T05:15:03.608Z","level":"ERROR","message":"User management audit logging failed","error":"Cannot read properties of undefined (reading 'userId')","action":"users_listed","userId":"cmfrx37f00009vzlc9nfkzk7m"}
 {"timestamp":"2025-09-22T05:15:59.775Z","level":"ERROR","message":"User management audit logging failed","error":"Cannot read properties of undefined (reading 'userId')","action":"users_listed","userId":"cmfrx37f00009vzlc9nfkzk7m"}
 {"timestamp":"2025-09-22T05:15:59.777Z","level":"ERROR","message":"User management audit logging failed","error":"Cannot read properties of undefined (reading 'userId')","action":"users_listed","userId":"cmfrx37f00009vzlc9nfkzk7m"}
+{"timestamp":"2025-09-22T06:07:44.155Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:07:48.344Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:07:57.188Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:08:05.159Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:08:10.328Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:08:16.233Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:08:24.121Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:08:38.018Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:08:46.517Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:08:53.093Z","level":"ERROR","message":"Token verification failed","error":"Invalid access token: jwt expired","ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"}
+{"timestamp":"2025-09-22T06:08:53.126Z","level":"ERROR","message":"Token verification failed","error":"Invalid access token: jwt expired","ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"}
+{"timestamp":"2025-09-22T06:08:53.578Z","level":"ERROR","message":"User management audit logging failed","error":"Cannot read properties of undefined (reading 'userId')","action":"users_listed","userId":"cmfrx37f00009vzlc9nfkzk7m"}
+{"timestamp":"2025-09-22T06:08:53.580Z","level":"ERROR","message":"User management audit logging failed","error":"Cannot read properties of undefined (reading 'userId')","action":"users_listed","userId":"cmfrx37f00009vzlc9nfkzk7m"}
+{"timestamp":"2025-09-22T06:11:11.568Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:11:58.207Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:12:07.004Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:14:33.508Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:15:11.153Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:15:28.405Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:19:48.807Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:20:55.871Z","level":"ERROR","message":"User management audit logging failed","error":"Cannot read properties of undefined (reading 'userId')","action":"users_listed","userId":"cmfrx37f00009vzlc9nfkzk7m"}
+{"timestamp":"2025-09-22T06:20:55.875Z","level":"ERROR","message":"User management audit logging failed","error":"Cannot read properties of undefined (reading 'userId')","action":"users_listed","userId":"cmfrx37f00009vzlc9nfkzk7m"}
+{"timestamp":"2025-09-22T06:21:11.799Z","level":"ERROR","message":"Resend email verification failed","error":"jwtUtils.generateToken is not a function","userId":"cmfrx37f00009vzlc9nfkzk7m"}
+{"timestamp":"2025-09-22T06:21:11.802Z","level":"ERROR","message":"jwtUtils.generateToken is not a function","statusCode":400,"details":{}}
+{"timestamp":"2025-09-22T06:21:11.800Z","level":"ERROR","message":"Resend email verification failed","error":"jwtUtils.generateToken is not a function","userId":"cmfrx37f00009vzlc9nfkzk7m"}
+{"timestamp":"2025-09-22T06:23:04.705Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:23:35.397Z","level":"ERROR","message":"Resend email verification failed","error":"jwtUtils.generateToken is not a function","userId":"cmfrx37f00009vzlc9nfkzk7m"}
+{"timestamp":"2025-09-22T06:23:35.398Z","level":"ERROR","message":"Resend email verification failed","error":"jwtUtils.generateToken is not a function","userId":"cmfrx37f00009vzlc9nfkzk7m"}
+{"timestamp":"2025-09-22T06:23:35.400Z","level":"ERROR","message":"jwtUtils.generateToken is not a function","statusCode":400,"details":{}}
+{"timestamp":"2025-09-22T06:29:18.629Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:35:28.049Z","level":"ERROR","message":"Token verification failed","error":"Invalid access token: jwt expired","ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"}
+{"timestamp":"2025-09-22T06:52:38.074Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:54:03.322Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T06:58:53.315Z","level":"ERROR","message":"Validation failed","statusCode":400,"details":{"errors":[{"type":"field","msg":"Please provide a valid email","path":"email","location":"body"},{"type":"field","msg":"Password is required","path":"password","location":"body"}]}}
+{"timestamp":"2025-09-22T06:59:58.938Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T07:00:03.496Z","level":"ERROR","message":"Validation failed","statusCode":400,"details":{"errors":[{"type":"field","msg":"Please provide a valid email","path":"email","location":"body"},{"type":"field","msg":"Password is required","path":"password","location":"body"}]}}
+{"timestamp":"2025-09-22T07:07:16.653Z","level":"ERROR","message":"Token verification failed","error":"Invalid access token: jwt malformed","ip":"::1","userAgent":"PostmanRuntime/7.46.1"}
+{"timestamp":"2025-09-22T07:10:27.095Z","level":"ERROR","message":"Validation failed","statusCode":400,"details":{"errors":[{"type":"field","value":"Brie:1192","msg":"New password must contain at least one uppercase letter, one lowercase letter, one number, and one special character","path":"newPassword","location":"body"}]}}
+{"timestamp":"2025-09-22T07:12:53.275Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T07:12:59.463Z","level":"ERROR","message":"Validation failed","statusCode":400,"details":{"errors":[{"type":"field","value":"Brie::11922","msg":"New password must contain at least one uppercase letter, one lowercase letter, one number, and one special character","path":"newPassword","location":"body"}]}}
+{"timestamp":"2025-09-22T07:19:12.354Z","level":"ERROR","message":"Failed to send password reset email","error":"Cannot read properties of null (reading 'sendMail')","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T07:30:18.898Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T07:30:43.842Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T07:30:47.625Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T07:31:51.234Z","level":"ERROR","message":"Failed to initialize email service","error":"nodemailer.createTransporter is not a function"}
+{"timestamp":"2025-09-22T07:53:12.180Z","level":"ERROR","message":"Token verification failed","error":"Invalid access token: jwt expired","ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"}
+{"timestamp":"2025-09-22T07:53:12.201Z","level":"ERROR","message":"Token verification failed","error":"Invalid access token: jwt expired","ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"}
+{"timestamp":"2025-09-22T08:04:58.153Z","level":"ERROR","message":"User management audit logging failed","error":"Cannot read properties of undefined (reading 'userId')","action":"users_listed","userId":"cmfrx37f00009vzlc9nfkzk7m"}
+{"timestamp":"2025-09-22T08:04:58.155Z","level":"ERROR","message":"User management audit logging failed","error":"Cannot read properties of undefined (reading 'userId')","action":"users_listed","userId":"cmfrx37f00009vzlc9nfkzk7m"}
+{"timestamp":"2025-09-22T08:20:45.076Z","level":"ERROR","message":"Token verification failed","error":"Invalid access token: jwt expired","ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"}
+{"timestamp":"2025-09-22T08:25:05.352Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T08:25:05.367Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"test@example.com"}
+{"timestamp":"2025-09-22T08:25:05.964Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"test@example.com"}
+{"timestamp":"2025-09-22T08:25:06.568Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"test@example.com"}
+{"timestamp":"2025-09-22T08:25:07.328Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"test@example.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T08:35:18.894Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T08:35:18.912Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"test@example.com"}
+{"timestamp":"2025-09-22T08:35:19.511Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"test@example.com"}
+{"timestamp":"2025-09-22T08:35:20.109Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"test@example.com"}
+{"timestamp":"2025-09-22T08:35:20.777Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"test@example.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T08:37:01.690Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T08:37:01.700Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:37:02.310Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:37:02.912Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:37:03.658Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T08:38:06.558Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T08:38:06.573Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com"}
+{"timestamp":"2025-09-22T08:38:07.177Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com"}
+{"timestamp":"2025-09-22T08:38:07.804Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com"}
+{"timestamp":"2025-09-22T08:38:08.704Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T08:41:43.083Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com"}
+{"timestamp":"2025-09-22T08:41:43.099Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T08:41:43.698Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com"}
+{"timestamp":"2025-09-22T08:41:44.311Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com"}
+{"timestamp":"2025-09-22T08:41:45.047Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T08:42:31.281Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T08:42:31.298Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:42:31.898Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:42:32.498Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:42:33.254Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T08:46:02.446Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T08:46:02.457Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:46:03.074Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:46:03.682Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:46:04.335Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T08:51:07.158Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:51:07.178Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T08:51:07.758Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:51:08.350Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:51:09.092Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T08:52:11.652Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T08:52:11.668Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:52:12.286Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:52:12.894Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:52:13.646Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T08:53:33.710Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T08:53:33.717Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:53:34.316Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:53:34.909Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:53:35.632Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T08:55:41.436Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T08:55:41.447Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:55:42.047Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:55:42.653Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:55:43.338Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T08:58:45.311Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T08:58:45.318Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:58:45.919Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:58:46.525Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:58:47.247Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T08:59:07.956Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T08:59:07.968Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:59:08.597Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:59:09.196Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T08:59:10.621Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T09:15:37.391Z","level":"ERROR","message":"Email service initialization failed","error":"getaddrinfo ENOTFOUND smtp.gmail.com"}
+{"timestamp":"2025-09-22T09:19:46.467Z","level":"ERROR","message":"Email service initialization failed","error":"getaddrinfo ENOTFOUND smtp.gmail.com"}
+{"timestamp":"2025-09-22T12:13:52.382Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T12:13:52.392Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T12:13:53.270Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T12:13:54.104Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T12:13:55.015Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T12:14:47.987Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T12:14:47.997Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T12:14:48.665Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T12:14:49.324Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T12:14:50.044Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T12:14:56.357Z","level":"ERROR","message":"Token verification failed","error":"Invalid access token: jwt expired","ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"}
+{"timestamp":"2025-09-22T12:14:56.380Z","level":"ERROR","message":"Token verification failed","error":"Invalid access token: jwt expired","ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"}
+{"timestamp":"2025-09-22T12:15:47.098Z","level":"ERROR","message":"Email service initialization failed","error":"C8560000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:c:\\ws\\deps\\openssl\\openssl\\ssl\\record\\ssl3_record.c:355:\n"}
+{"timestamp":"2025-09-22T12:17:58.322Z","level":"ERROR","message":"Failed to send password reset email","error":"C8560000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:c:\\ws\\deps\\openssl\\openssl\\ssl\\record\\ssl3_record.c:355:\n","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T12:31:03.881Z","level":"ERROR","message":"User management audit logging failed","error":"Cannot read properties of undefined (reading 'userId')","action":"users_listed","userId":"cmfrwuebu0006vzzcng9ypuv6"}
+{"timestamp":"2025-09-22T12:31:03.884Z","level":"ERROR","message":"User management audit logging failed","error":"Cannot read properties of undefined (reading 'userId')","action":"users_listed","userId":"cmfrwuebu0006vzzcng9ypuv6"}
+{"timestamp":"2025-09-22T12:31:05.890Z","level":"ERROR","message":"User management audit logging failed","error":"Cannot read properties of undefined (reading 'userId')","action":"users_listed","userId":"cmfrwuebu0006vzzcng9ypuv6"}
+{"timestamp":"2025-09-22T12:31:05.891Z","level":"ERROR","message":"User management audit logging failed","error":"Cannot read properties of undefined (reading 'userId')","action":"users_listed","userId":"cmfrwuebu0006vzzcng9ypuv6"}
+{"timestamp":"2025-09-22T12:31:13.901Z","level":"ERROR","message":"User management audit logging failed","error":"Cannot read properties of undefined (reading 'userId')","action":"users_listed","userId":"cmfrwuebu0006vzzcng9ypuv6"}
+{"timestamp":"2025-09-22T12:31:13.942Z","level":"ERROR","message":"User management audit logging failed","error":"Cannot read properties of undefined (reading 'userId')","action":"users_listed","userId":"cmfrwuebu0006vzzcng9ypuv6"}
+{"timestamp":"2025-09-22T12:46:29.194Z","level":"ERROR","message":"Email service initialization failed","error":"58310000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:c:\\ws\\deps\\openssl\\openssl\\ssl\\record\\ssl3_record.c:355:\n"}
+{"timestamp":"2025-09-22T12:48:19.060Z","level":"ERROR","message":"Email service initialization failed","error":"B85B0000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:c:\\ws\\deps\\openssl\\openssl\\ssl\\record\\ssl3_record.c:355:\n"}
+{"timestamp":"2025-09-22T12:48:35.139Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T12:48:35.272Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T12:48:35.983Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T12:48:36.881Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T12:48:37.802Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T12:49:59.011Z","level":"ERROR","message":"Email service initialization failed","error":"40220000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:c:\\ws\\deps\\openssl\\openssl\\ssl\\record\\ssl3_record.c:355:\n"}
+{"timestamp":"2025-09-22T12:50:05.897Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T12:50:07.522Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T12:50:09.171Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T12:50:10.449Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T12:50:10.465Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T12:54:47.611Z","level":"ERROR","message":"Email service initialization failed","error":"701F0000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:c:\\ws\\deps\\openssl\\openssl\\ssl\\record\\ssl3_record.c:355:\n"}
+{"timestamp":"2025-09-22T12:58:45.856Z","level":"ERROR","message":"Email service initialization failed","error":"FC5B0000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:c:\\ws\\deps\\openssl\\openssl\\ssl\\record\\ssl3_record.c:355:\n"}
+{"timestamp":"2025-09-22T12:58:48.284Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T12:58:48.302Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T12:58:49.858Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T12:58:50.638Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T12:58:52.141Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T13:00:51.518Z","level":"ERROR","message":"Token verification failed","error":"Invalid access token: jwt expired","ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"}
+{"timestamp":"2025-09-22T13:01:09.524Z","level":"ERROR","message":"Failed to send password reset email","error":"FC5B0000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:c:\\ws\\deps\\openssl\\openssl\\ssl\\record\\ssl3_record.c:355:\n","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T13:03:57.534Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T13:03:57.546Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T13:03:58.703Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T13:04:00.840Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com"}
+{"timestamp":"2025-09-22T13:04:02.091Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"brwubet@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T13:09:42.244Z","level":"ERROR","message":"Email service initialization failed","error":"14340000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:c:\\ws\\deps\\openssl\\openssl\\ssl\\record\\ssl3_record.c:355:\n"}
+{"timestamp":"2025-09-22T13:09:47.294Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com"}
+{"timestamp":"2025-09-22T13:09:47.303Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T13:09:47.996Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com"}
+{"timestamp":"2025-09-22T13:09:49.511Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com"}
+{"timestamp":"2025-09-22T13:09:50.463Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T13:11:42.953Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T13:11:42.972Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com"}
+{"timestamp":"2025-09-22T13:11:43.891Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com"}
+{"timestamp":"2025-09-22T13:11:44.815Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com"}
+{"timestamp":"2025-09-22T13:11:45.659Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T13:13:35.101Z","level":"ERROR","message":"Email service initialization failed","error":"24190000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:c:\\ws\\deps\\openssl\\openssl\\ssl\\record\\ssl3_record.c:355:\n"}
+{"timestamp":"2025-09-22T13:13:59.587Z","level":"ERROR","message":"Email service initialization failed","error":"70470000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:c:\\ws\\deps\\openssl\\openssl\\ssl\\record\\ssl3_record.c:355:\n"}
+{"timestamp":"2025-09-22T13:14:13.312Z","level":"ERROR","message":"Email service initialization failed","error":"EC0E0000:error:0A00010B:SSL routines:ssl3_get_record:wrong version number:c:\\ws\\deps\\openssl\\openssl\\ssl\\record\\ssl3_record.c:355:\n"}
+{"timestamp":"2025-09-22T13:14:21.190Z","level":"ERROR","message":"Email service initialization failed","error":"Missing credentials for \"PLAIN\""}
+{"timestamp":"2025-09-22T13:14:25.585Z","level":"ERROR","message":"Failed to send password reset email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com"}
+{"timestamp":"2025-09-22T13:14:26.765Z","level":"ERROR","message":"Failed to send welcome email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com"}
+{"timestamp":"2025-09-22T13:14:29.576Z","level":"ERROR","message":"Failed to send MFA setup email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com"}
+{"timestamp":"2025-09-22T13:14:30.703Z","level":"ERROR","message":"Failed to send security alert email","error":"Missing credentials for \"PLAIN\"","email":"briecoder@gmail.com","alertType":"Suspicious Login Attempt"}
+{"timestamp":"2025-09-22T13:18:24.124Z","level":"ERROR","message":"Token verification failed","error":"Invalid access token: jwt expired","ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"}
+{"timestamp":"2025-09-22T13:18:24.138Z","level":"ERROR","message":"Token verification failed","error":"Invalid access token: jwt expired","ip":"::1","userAgent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"}
+{"timestamp":"2025-09-22T13:19:33.394Z","level":"ERROR","message":"Password reset completion failed","error":"Invalid or expired reset token"}
+{"timestamp":"2025-09-22T13:19:33.396Z","level":"ERROR","message":"Password reset completion failed","error":"Invalid or expired reset token","ip":"::1"}
+{"timestamp":"2025-09-22T13:19:33.397Z","level":"ERROR","message":"Invalid or expired reset token","statusCode":400,"details":{}}
+{"timestamp":"2025-09-22T13:21:09.387Z","level":"ERROR","message":"User registration failed","error":"User with this email already exists","email":"briewubet1192@gmil.com"}
+{"timestamp":"2025-09-22T13:21:09.389Z","level":"ERROR","message":"Registration failed","error":"User with this email already exists","email":"briewubet1192@gmil.com","ip":"::1"}
+{"timestamp":"2025-09-22T13:21:09.390Z","level":"ERROR","message":"User with this email already exists","statusCode":400,"details":{}}
+{"timestamp":"2025-09-22T13:21:42.270Z","level":"ERROR","message":"User login failed","error":"Invalid credentials","email":"briewubet1192@gmil.com","ip":"::1"}
+{"timestamp":"2025-09-22T13:21:42.271Z","level":"ERROR","message":"Login failed","error":"Invalid credentials","email":"briewubet1192@gmil.com","ip":"::1"}
+{"timestamp":"2025-09-22T13:21:42.272Z","level":"ERROR","message":"Invalid credentials","statusCode":401,"details":{}}

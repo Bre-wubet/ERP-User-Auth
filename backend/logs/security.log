@@ -101,3 +101,4 @@
 {"timestamp":"2025-09-20T14:46:46.748Z","level":"WARN","message":"Security event: user_management_denied","event":"user_management_denied","id":"cmfrx37f00009vzlc9nfkzk7m","email":"brwubet@gmail.com","roleId":"cmfrwudto0002vzzcnheb454p"}
 {"timestamp":"2025-09-20T14:46:46.760Z","level":"WARN","message":"Security event: insufficient_role","event":"insufficient_role","id":"cmfrx37f00009vzlc9nfkzk7m","email":"brwubet@gmail.com","roleId":"cmfrwudto0002vzzcnheb454p"}
 {"timestamp":"2025-09-20T15:02:26.573Z","level":"WARN","message":"Security event: login_failed_user_not_found","event":"login_failed_user_not_found","email":"admin@example.com","ip":"::1"}
+{"timestamp":"2025-09-22T13:21:42.270Z","level":"WARN","message":"Security event: login_failed_invalid_password","event":"login_failed_invalid_password","userId":"cmfrylshw0001vz4w5f6rwf4k","email":"briewubet1192@gmil.com","ip":"::1"}

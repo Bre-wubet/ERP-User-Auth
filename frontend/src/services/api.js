@@ -117,6 +117,15 @@ export const authAPI = {
   
   // Disable MFA
   disableMFA: (token) => api.post('/auth/mfa/disable', { token }),
+  
+  // Verify email
+  verifyEmail: (token) => api.post('/auth/verify-email', { token }),
+  
+  // Resend email verification
+  resendEmailVerification: () => api.post('/auth/resend-verification'),
+  
+  // Cleanup expired tokens (admin)
+  cleanupExpiredTokens: () => api.post('/auth/cleanup-tokens'),
 };
 
 // User management API endpoints

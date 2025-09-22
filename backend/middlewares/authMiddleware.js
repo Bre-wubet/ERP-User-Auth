@@ -7,12 +7,6 @@ import { logger } from '../utils/logger.js';
  * Handles JWT token verification and user authentication
  */
 
-/**
- * Verify JWT access token
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Next middleware function
- */
 export const verifyToken = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -81,12 +75,6 @@ export const verifyToken = async (req, res, next) => {
   }
 };
 
-/**
- * Verify session token
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Next middleware function
- */
 export const verifySession = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -134,13 +122,6 @@ export const verifySession = async (req, res, next) => {
   }
 };
 
-/**
- * Optional authentication middleware
- * Doesn't fail if no token is provided
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Next middleware function
- */
 export const optionalAuth = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -181,12 +162,6 @@ export const optionalAuth = async (req, res, next) => {
   }
 };
 
-/**
- * Verify API token
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Next middleware function
- */
 export const verifyApiToken = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -228,12 +203,7 @@ export const verifyApiToken = async (req, res, next) => {
   }
 };
 
-/**
- * Rate limiting middleware for authentication endpoints
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Next middleware function
- */
+
 export const authRateLimit = (req, res, next) => {
   // This would typically use a rate limiting library like express-rate-limit
   // For now, we'll implement a simple in-memory rate limiter
@@ -241,7 +211,7 @@ export const authRateLimit = (req, res, next) => {
   const ip = req.ip || req.connection.remoteAddress;
   const now = Date.now();
   const windowMs = 15 * 60 * 1000; // 15 minutes
-  const maxAttempts = 5;
+  const maxAttempts = 10;
 
   // Initialize rate limit store if it doesn't exist
   if (!global.rateLimitStore) {
@@ -282,12 +252,6 @@ export const authRateLimit = (req, res, next) => {
   next();
 };
 
-/**
- * Check if user is authenticated
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Next middleware function
- */
 export const requireAuth = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({
@@ -298,12 +262,6 @@ export const requireAuth = (req, res, next) => {
   next();
 };
 
-/**
- * Check if user is active
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Next middleware function
- */
 export const requireActiveUser = async (req, res, next) => {
   try {
     if (!req.user) {
@@ -326,12 +284,6 @@ export const requireActiveUser = async (req, res, next) => {
   }
 };
 
-/**
- * Log authentication attempts
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Next middleware function
- */
 export const logAuthAttempt = (req, res, next) => {
   const originalSend = res.send;
   

@@ -32,7 +32,7 @@ const LoginForm = () => {
       
       if (result.requiresMFA) {
         // Redirect to MFA page
-        navigate('/mfa', { state: { userId: result.userId } });
+        navigate('/mfa', { state: { credentials: { email: data.email, password: data.password } } });
       } else {
         // Redirect to dashboard
         navigate('/dashboard');

@@ -310,6 +310,45 @@ export const updateProfile = asyncHandler(async (req, res) => {
   }
 });
 
+export const verifyEmail = asyncHandler(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return sendErrorResponse(res, 'Validation failed', 400, { errors: errors.array() });
+  }
+
+  const { token } = req.body;
+
+  try {
+    await authService.verifyEmail(token);
+    sendSuccessResponse(res, 'Email verified successfully');
+  } catch (error) {
+    logger.error('Email verification failed', { error: error.message });
+    sendErrorResponse(res, error.message, 400);
+  }
+});
+
+export const resendEmailVerification = asyncHandler(async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    await authService.resendEmailVerification(userId);
+    sendSuccessResponse(res, 'Verification email sent successfully');
+  } catch (error) {
+    logger.error('Resend email verification failed', { error: error.message, userId });
+    sendErrorResponse(res, error.message, 400);
+  }
+});
+
+export const cleanupExpiredTokens = asyncHandler(async (req, res) => {
+  try {
+    await authService.cleanupExpiredResetTokens();
+    sendSuccessResponse(res, 'Expired tokens cleaned up successfully');
+  } catch (error) {
+    logger.error('Token cleanup failed', { error: error.message });
+    sendErrorResponse(res, error.message, 500);
+  }
+});
+
 // Validation rules
 export const registerValidation = [
   body('email')
@@ -407,4 +446,10 @@ export const updateProfileValidation = [
     .trim()
     .isLength({ min: 1, max: 50 })
     .withMessage('Last name must be between 1 and 50 characters')
+];
+
+export const emailVerificationValidation = [
+  body('token')
+    .notEmpty()
+    .withMessage('Verification token is required')
 ];

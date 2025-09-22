@@ -15,6 +15,8 @@ import Navbar from './components/layout/Navbar';
 import LoginForm from './components/auth/LoginForm';
 import RegisterForm from './components/auth/RegisterForm';
 import MFAForm from './components/auth/MFAForm';
+import ForgotPasswordForm from './components/auth/ForgotPasswordForm';
+import ResetPasswordForm from './components/auth/ResetPasswordForm';
 import Dashboard from './pages/Dashboard';
 import UserManagement from './pages/UserManagement';
 import RoleManagement from './pages/RoleManagement';
@@ -77,6 +79,8 @@ function App() {
               <Route path="/login" element={<LoginForm />} />
               <Route path="/register" element={<RegisterForm />} />
               <Route path="/mfa" element={<MFAForm />} />
+              <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+              <Route path="/reset-password" element={<ResetPasswordForm />} />
               
                       {/* Protected Routes */}
                       <Route

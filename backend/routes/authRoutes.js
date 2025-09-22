@@ -13,6 +13,9 @@ import {
   disableMFA,
   getProfile,
   updateProfile,
+  verifyEmail,
+  resendEmailVerification,
+  cleanupExpiredTokens,
   registerValidation,
   loginValidation,
   refreshTokenValidation,
@@ -20,7 +23,8 @@ import {
   passwordResetValidation,
   completePasswordResetValidation,
   mfaValidation,
-  updateProfileValidation
+  updateProfileValidation,
+  emailVerificationValidation
 } from '../controllers/authController.js';
 import { verifyToken, authRateLimit, logAuthAttempt } from '../middlewares/authMiddleware.js';
 import { auditAuth } from '../middlewares/auditMiddleware.js';
@@ -118,6 +122,26 @@ router.post('/mfa/disable',
   mfaValidation,
   auditAuth('mfa_disable'),
   disableMFA
+);
+
+// Email verification routes
+router.post('/verify-email', 
+  emailVerificationValidation,
+  auditAuth('email_verification'),
+  verifyEmail
+);
+
+router.post('/resend-verification', 
+  verifyToken,
+  auditAuth('resend_email_verification'),
+  resendEmailVerification
+);
+
+// Admin/utility routes
+router.post('/cleanup-tokens', 
+  verifyToken,
+  auditAuth('cleanup_tokens'),
+  cleanupExpiredTokens
 );
 
 export default router;
