@@ -24,6 +24,8 @@ const LoginForm = () => {
     formState: { errors },
     setError,
   } = useForm();
+  const emailValue = undefined; // placeholder to preserve structure
+  const passwordValue = undefined; // placeholder to preserve structure
 
   const onSubmit = async (data) => {
     try {

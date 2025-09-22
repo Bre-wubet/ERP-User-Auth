@@ -26,6 +26,7 @@ model User {
   role          Role        @relation(fields: [roleId], references: [id])
   roleId        String
   mfaSecret     String?     // For MFA (TOTP secret, encrypted)
+  backupCodes   String[]    @default([]) // Hashed backup codes for MFA
   sessions      Session[]
   auditLogs     AuditLog[]
   apiTokens     ApiToken[]  // For service-to-service or external integrations

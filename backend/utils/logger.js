@@ -20,31 +20,16 @@ class Logger {
     this.ensureLogDirectory();
   }
 
-  /**
-   * Ensure log directory exists
-   */
   ensureLogDirectory() {
     if (!fs.existsSync(this.logDir)) {
       fs.mkdirSync(this.logDir, { recursive: true });
     }
   }
 
-  /**
-   * Check if log level should be logged
-   * @param {string} level - Log level to check
-   * @returns {boolean} True if should log
-   */
   shouldLog(level) {
     return this.levels[level] <= this.levels[this.logLevel];
   }
 
-  /**
-   * Format log message
-   * @param {string} level - Log level
-   * @param {string} message - Log message
-   * @param {Object} meta - Additional metadata
-   * @returns {Object} Formatted log object
-   */
   formatMessage(level, message, meta = {}) {
     return {
       timestamp: new Date().toISOString(),
@@ -54,11 +39,6 @@ class Logger {
     };
   }
 
-  /**
-   * Write log to file
-   * @param {string} filename - Log file name
-   * @param {Object} logData - Log data to write
-   */
   writeToFile(filename, logData) {
     const filePath = path.join(this.logDir, filename);
     const logLine = JSON.stringify(logData) + '\n';
@@ -70,11 +50,6 @@ class Logger {
     });
   }
 
-  /**
-   * Log error message
-   * @param {string} message - Error message
-   * @param {Object} meta - Additional metadata
-   */
   error(message, meta = {}) {
     if (!this.shouldLog('error')) return;
 
@@ -87,11 +62,6 @@ class Logger {
     this.writeToFile('error.log', logData);
   }
 
-  /**
-   * Log warning message
-   * @param {string} message - Warning message
-   * @param {Object} meta - Additional metadata
-   */
   warn(message, meta = {}) {
     if (!this.shouldLog('warn')) return;
 
@@ -104,11 +74,6 @@ class Logger {
     this.writeToFile('warn.log', logData);
   }
 
-  /**
-   * Log info message
-   * @param {string} message - Info message
-   * @param {Object} meta - Additional metadata
-   */
   info(message, meta = {}) {
     if (!this.shouldLog('info')) return;
 
@@ -121,11 +86,6 @@ class Logger {
     this.writeToFile('info.log', logData);
   }
 
-  /**
-   * Log debug message
-   * @param {string} message - Debug message
-   * @param {Object} meta - Additional metadata
-   */
   debug(message, meta = {}) {
     if (!this.shouldLog('debug')) return;
 
@@ -138,12 +98,6 @@ class Logger {
     this.writeToFile('debug.log', logData);
   }
 
-  /**
-   * Log authentication events
-   * @param {string} event - Authentication event type
-   * @param {Object} user - User information
-   * @param {Object} meta - Additional metadata
-   */
   auth(event, user, meta = {}) {
     const message = `Authentication event: ${event}`;
     const authMeta = {
@@ -157,11 +111,6 @@ class Logger {
     this.writeToFile('auth.log', this.formatMessage('info', message, authMeta));
   }
 
-  /**
-   * Log security events
-   * @param {string} event - Security event type
-   * @param {Object} meta - Additional metadata
-   */
   security(event, meta = {}) {
     const message = `Security event: ${event}`;
     const securityMeta = {
@@ -173,12 +122,6 @@ class Logger {
     this.writeToFile('security.log', this.formatMessage('warn', message, securityMeta));
   }
 
-  /**
-   * Log audit events
-   * @param {string} action - Action performed
-   * @param {Object} user - User information
-   * @param {Object} meta - Additional metadata
-   */
   audit(action, user, meta = {}) {
     const message = `Audit: ${action}`;
     const auditMeta = {
@@ -192,12 +135,6 @@ class Logger {
     this.writeToFile('audit.log', this.formatMessage('info', message, auditMeta));
   }
 
-  /**
-   * Log HTTP requests
-   * @param {Object} req - Express request object
-   * @param {Object} res - Express response object
-   * @param {number} responseTime - Response time in ms
-   */
   http(req, res, responseTime) {
     const logData = {
       method: req.method,

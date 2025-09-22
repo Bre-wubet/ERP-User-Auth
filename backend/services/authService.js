@@ -15,11 +15,6 @@ class AuthService {
     this.saltRounds = 12;
   }
 
-  /**
-   * Register a new user
-   * @param {Object} userData - User registration data
-   * @returns {Promise<Object>} Created user and tokens
-   */
   async register(userData) {
     const { email, password, firstName, lastName, roleId } = userData;
 
@@ -92,11 +87,6 @@ class AuthService {
     }
   }
 
-  /**
-   * Authenticate user login
-   * @param {Object} credentials - Login credentials
-   * @returns {Promise<Object>} User and tokens
-   */
   async login(credentials) {
     const { email, password, mfaToken, ip, userAgent } = credentials;
 
@@ -168,11 +158,6 @@ class AuthService {
     }
   }
 
-  /**
-   * Refresh access token
-   * @param {string} refreshToken - Refresh token
-   * @returns {Promise<Object>} New access token
-   */
   async refreshToken(refreshToken) {
     try {
       const decoded = jwtUtils.verifyRefreshToken(refreshToken);
@@ -202,12 +187,6 @@ class AuthService {
     }
   }
 
-  /**
-   * Logout user
-   * @param {string} userId - User ID
-   * @param {string} sessionId - Session ID
-   * @returns {Promise<void>}
-   */
   async logout(userId, sessionId) {
     try {
       // Delete session
@@ -222,11 +201,6 @@ class AuthService {
     }
   }
 
-  /**
-   * Logout all sessions for a user
-   * @param {string} userId - User ID
-   * @returns {Promise<void>}
-   */
   async logoutAll(userId) {
     try {
       // Delete all user sessions
@@ -241,13 +215,6 @@ class AuthService {
     }
   }
 
-  /**
-   * Change user password
-   * @param {string} userId - User ID
-   * @param {string} currentPassword - Current password
-   * @param {string} newPassword - New password
-   * @returns {Promise<void>}
-   */
   async changePassword(userId, currentPassword, newPassword) {
     try {
       const user = await db.client.user.findUnique({
@@ -283,11 +250,6 @@ class AuthService {
     }
   }
 
-  /**
-   * Reset password (forgot password flow)
-   * @param {string} email - User email
-   * @returns {Promise<string>} Success message
-   */
   async initiatePasswordReset(email) {
     try {
       const user = await db.client.user.findUnique({
@@ -341,12 +303,6 @@ class AuthService {
     }
   }
 
-  /**
-   * Complete password reset
-   * @param {string} resetToken - Reset token
-   * @param {string} newPassword - New password
-   * @returns {Promise<void>}
-   */
   async completePasswordReset(resetToken, newPassword) {
     try {
       // Find valid reset token
@@ -422,11 +378,6 @@ class AuthService {
     }
   }
 
-  /**
-   * Setup MFA for user
-   * @param {string} userId - User ID
-   * @returns {Promise<Object>} MFA setup data
-   */
   async setupMFA(userId) {
     try {
       const user = await db.client.user.findUnique({
@@ -454,13 +405,6 @@ class AuthService {
     }
   }
 
-  /**
-   * Enable MFA for user
-   * @param {string} userId - User ID
-   * @param {string} token - MFA token to verify
-   * @param {string} secret - MFA secret
-   * @returns {Promise<void>}
-   */
   async enableMFA(userId, token, secret) {
     try {
       // Verify token
@@ -470,9 +414,15 @@ class AuthService {
       }
 
       // Update user with MFA secret
+      // Generate and store hashed backup codes
+      const backupCodes = mfaUtils.generateBackupCodes();
+      const hashedCodes = await Promise.all(
+        backupCodes.map(async (code) => await bcrypt.hash(code, this.saltRounds))
+      );
+
       await db.client.user.update({
         where: { id: userId },
-        data: { mfaSecret: secret }
+        data: { mfaSecret: secret, backupCodes: hashedCodes }
       });
 
       // Send MFA setup confirmation email
@@ -495,18 +445,14 @@ class AuthService {
       }
 
       logger.auth('mfa_enabled', { id: userId });
+      // Return backup codes to the caller so they can be shown once
+      return { backupCodes };
     } catch (error) {
       logger.error('MFA enable failed', { error: error.message, userId });
       throw error;
     }
   }
 
-  /**
-   * Disable MFA for user
-   * @param {string} userId - User ID
-   * @param {string} token - MFA token to verify
-   * @returns {Promise<void>}
-   */
   async disableMFA(userId, token) {
     try {
       const user = await db.client.user.findUnique({
@@ -517,32 +463,53 @@ class AuthService {
         throw new Error('MFA not enabled');
       }
 
-      // Verify token
-      const isTokenValid = mfaUtils.verifyToken(token, user.mfaSecret);
-      if (!isTokenValid) {
+      // Verify token: accept 6-digit TOTP or backup code
+      let valid = false;
+      if (/^\d{6}$/.test(token)) {
+        valid = mfaUtils.verifyToken(token, user.mfaSecret);
+      } else if (/^[A-F0-9]{8}$/i.test(token) && Array.isArray(user.backupCodes)) {
+        // Compare against hashed backup codes
+        for (const hashed of user.backupCodes) {
+          if (await bcrypt.compare(token.toUpperCase(), hashed)) {
+            valid = true;
+            break;
+          }
+        }
+      }
+
+      if (!valid) {
         throw new Error('Invalid MFA token');
       }
 
       // Remove MFA secret
       await db.client.user.update({
         where: { id: userId },
-        data: { mfaSecret: null }
+        data: { mfaSecret: null, backupCodes: [] }
       });
 
       logger.auth('mfa_disabled', user);
+
+      // Send security alert email
+      try {
+        await emailService.sendSecurityAlertEmail(
+          user.email,
+          `${user.firstName} ${user.lastName}`,
+          'MFA Disabled',
+          { timestamp: new Date().toISOString() }
+        );
+      } catch (emailError) {
+        logger.warn('Failed to send MFA disabled alert email', {
+          error: emailError.message,
+          userId
+        });
+      }
     } catch (error) {
       logger.error('MFA disable failed', { error: error.message, userId });
       throw error;
     }
   }
 
-  /**
-   * Create user session
-   * @param {string} userId - User ID
-   * @param {string} ip - IP address
-   * @param {string} userAgent - User agent
-   * @returns {Promise<Object>} Created session
-   */
+
   async createSession(userId, ip, userAgent) {
     try {
       const sessionToken = jwtUtils.generateSecureToken();
@@ -565,11 +532,7 @@ class AuthService {
     }
   }
 
-  /**
-   * Verify session
-   * @param {string} sessionToken - Session token
-   * @returns {Promise<Object>} Session data
-   */
+
   async verifySession(sessionToken) {
     try {
       const session = await db.client.session.findUnique({
@@ -596,16 +559,10 @@ class AuthService {
     }
   }
 
-  /**
-   * Verify email address
-   * @param {string} verificationToken - Email verification token
-   * @returns {Promise<void>}
-   */
+
   async verifyEmail(verificationToken) {
     try {
-      // In a real implementation, you'd have email verification tokens
-      // For now, we'll simulate the process
-      const decoded = jwtUtils.verifyToken(verificationToken);
+      const decoded = jwtUtils.verifyApiToken(verificationToken);
       
       const user = await db.client.user.findUnique({
         where: { id: decoded.userId }
@@ -628,11 +585,7 @@ class AuthService {
     }
   }
 
-  /**
-   * Resend email verification
-   * @param {string} userId - User ID
-   * @returns {Promise<void>}
-   */
+
   async resendEmailVerification(userId) {
     try {
       const user = await db.client.user.findUnique({
@@ -647,8 +600,8 @@ class AuthService {
         throw new Error('Email is already verified');
       }
 
-      // Generate verification token
-      const verificationToken = jwtUtils.generateToken({ userId: user.id }, '1h');
+      // Generate verification token (API token with limited lifetime)
+      const verificationToken = jwtUtils.generateApiToken({ userId: user.id, purpose: 'email_verification' }, '1h');
 
       // Send verification email
       try {
@@ -672,10 +625,7 @@ class AuthService {
     }
   }
 
-  /**
-   * Clean up expired password reset tokens
-   * @returns {Promise<void>}
-   */
+
   async cleanupExpiredResetTokens() {
     try {
       const result = await db.client.passwordResetToken.deleteMany({
@@ -696,11 +646,7 @@ class AuthService {
     }
   }
 
-  /**
-   * Sanitize user data (remove sensitive information)
-   * @param {Object} user - User object
-   * @returns {Object} Sanitized user object
-   */
+
   sanitizeUser(user) {
     const { password, mfaSecret, ...sanitizedUser } = user;
     return sanitizedUser;

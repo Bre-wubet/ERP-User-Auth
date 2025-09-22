@@ -13,6 +13,7 @@ import { Shield, ArrowLeft } from 'lucide-react';
  */
 const MFAForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [useBackupCode, setUseBackupCode] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -34,12 +35,13 @@ const MFAForm = () => {
   const onSubmit = async (data) => {
     try {
       setIsLoading(true);
-      await authAPI.login({ ...credentials, mfaToken: data.mfaToken });
+      const token = (data.mfaToken || '').toString().trim().toUpperCase();
+      await authAPI.login({ ...credentials, mfaToken: token });
       window.location.href = '/dashboard';
     } catch (error) {
       setError('root', {
         type: 'manual',
-        message: error.response?.data?.message || 'Invalid MFA token. Please try again.',
+        message: error.response?.data?.message || 'Invalid code. Please try again.',
       });
     } finally {
       setIsLoading(false);
@@ -57,11 +59,11 @@ const MFAForm = () => {
           <div className="mx-auto h-12 w-12 text-blue-600">
             <Shield className="h-12 w-12" />
           </div>
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Two-Factor Authentication
-          </h2>
+          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Two-Factor Authentication</h2>
           <p className="mt-2 text-sm text-gray-600">
-            Enter the 6-digit code from your authenticator app.
+            {useBackupCode
+              ? 'Enter one of your 8-character backup codes.'
+              : 'Enter the 6-digit code from your authenticator app.'}
           </p>
         </div>
 
@@ -75,32 +77,42 @@ const MFAForm = () => {
 
             <div>
               <Input
-                label="Authentication Code"
+                label={useBackupCode ? 'Backup Code' : 'Authentication Code'}
                 type="text"
-                placeholder="000000"
+                placeholder={useBackupCode ? 'XXXXXXXX' : '000000'}
                 error={errors.mfaToken?.message}
                 {...register('mfaToken', {
-                  required: 'Authentication code is required',
-                  pattern: {
-                    value: /^\d{6}$/,
-                    message: 'Please enter a 6-digit code',
-                  },
+                  required: useBackupCode ? 'Backup code is required' : 'Authentication code is required',
+                  validate: (value) => {
+                    if (!value) return false;
+                    const v = value.toString().trim().toUpperCase();
+                    if (useBackupCode) return /^[A-F0-9]{8}$/.test(v) || 'Backup code must be 8 hex characters';
+                    return /^\d{6}$/.test(v) || 'Please enter a 6-digit code';
+                  }
                 })}
-                maxLength={6}
+                maxLength={useBackupCode ? 8 : 6}
                 className="text-center text-2xl tracking-widest"
               />
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-              <h3 className="text-sm font-medium text-blue-800 mb-2">
-                How to get your code:
-              </h3>
-              <ul className="text-sm text-blue-700 space-y-1">
-                <li>• Open your authenticator app (Google Authenticator, Authy, etc.)</li>
-                <li>• Find the code for "ERP Security System"</li>
-                <li>• Enter the 6-digit code above</li>
-              </ul>
-            </div>
+            {useBackupCode ? (
+              <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
+                <h3 className="text-sm font-medium text-amber-800 mb-2">Using a backup code</h3>
+                <ul className="text-sm text-amber-700 space-y-1">
+                  <li>• Backup codes can be used if you lose access to your authenticator.</li>
+                  <li>• Each backup code can be used once.</li>
+                </ul>
+              </div>
+            ) : (
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                <h3 className="text-sm font-medium text-blue-800 mb-2">How to get your code</h3>
+                <ul className="text-sm text-blue-700 space-y-1">
+                  <li>• Open your authenticator app (Google Authenticator, Authy, etc.)</li>
+                  <li>• Find the code for "ERP Security System"</li>
+                  <li>• Enter the 6-digit code above</li>
+                </ul>
+              </div>
+            )}
 
             <div>
               <Button
@@ -113,6 +125,16 @@ const MFAForm = () => {
               >
                 {isLoading ? 'Verifying...' : 'Verify Code'}
               </Button>
+            </div>
+
+            <div className="text-center text-sm">
+              <button
+                type="button"
+                onClick={() => setUseBackupCode(!useBackupCode)}
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
+                {useBackupCode ? 'Use authenticator code instead' : 'Use a backup code'}
+              </button>
             </div>
           </form>
         </Card>

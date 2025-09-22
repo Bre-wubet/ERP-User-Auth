@@ -11,11 +11,6 @@ class SSOUtils {
     this.ssoIssuer = process.env.SSO_ISSUER || 'erp-system';
   }
 
-  /**
-   * Generate SAML request
-   * @param {Object} config - SAML configuration
-   * @returns {Object} SAML request object
-   */
   generateSAMLRequest(config) {
     const {
       issuer = this.ssoIssuer,
@@ -38,12 +33,6 @@ class SSOUtils {
     };
   }
 
-  /**
-   * Generate SAML response
-   * @param {Object} config - SAML configuration
-   * @param {Object} user - User information
-   * @returns {Object} SAML response object
-   */
   generateSAMLResponse(config, user) {
     const {
       issuer = this.ssoIssuer,
@@ -121,11 +110,6 @@ class SSOUtils {
     };
   }
 
-  /**
-   * Generate OAuth2 authorization URL
-   * @param {Object} config - OAuth2 configuration
-   * @returns {string} Authorization URL
-   */
   generateOAuth2AuthURL(config) {
     const {
       clientId,
@@ -146,12 +130,6 @@ class SSOUtils {
     return `${config.authorizationEndpoint}?${params.toString()}`;
   }
 
-  /**
-   * Exchange OAuth2 authorization code for tokens
-   * @param {Object} config - OAuth2 configuration
-   * @param {string} code - Authorization code
-   * @returns {Promise<Object>} Token response
-   */
   async exchangeOAuth2Code(config, code) {
     const {
       clientId,
@@ -188,12 +166,6 @@ class SSOUtils {
     }
   }
 
-  /**
-   * Get user info from OAuth2 provider
-   * @param {Object} config - OAuth2 configuration
-   * @param {string} accessToken - Access token
-   * @returns {Promise<Object>} User information
-   */
   async getOAuth2UserInfo(config, accessToken) {
     const { userInfoEndpoint } = config;
 
@@ -215,12 +187,6 @@ class SSOUtils {
     }
   }
 
-  /**
-   * Generate JWT for SSO session
-   * @param {Object} user - User information
-   * @param {Object} config - SSO configuration
-   * @returns {string} JWT token
-   */
   generateSSOToken(user, config = {}) {
     const {
       expiresIn = '1h',
@@ -246,12 +212,6 @@ class SSOUtils {
     });
   }
 
-  /**
-   * Verify SSO JWT token
-   * @param {string} token - JWT token to verify
-   * @param {Object} config - SSO configuration
-   * @returns {Object} Decoded token payload
-   */
   verifySSOToken(token, config = {}) {
     const {
       issuer = this.ssoIssuer,
@@ -268,11 +228,6 @@ class SSOUtils {
     }
   }
 
-  /**
-   * Generate state parameter for OAuth2 flow
-   * @param {Object} data - Data to encode in state
-   * @returns {string} Encoded state parameter
-   */
   generateState(data = {}) {
     const state = {
       nonce: crypto.randomBytes(16).toString('hex'),
@@ -283,12 +238,6 @@ class SSOUtils {
     return Buffer.from(JSON.stringify(state)).toString('base64');
   }
 
-  /**
-   * Verify and decode state parameter
-   * @param {string} state - State parameter to decode
-   * @param {number} maxAge - Maximum age in milliseconds (default: 10 minutes)
-   * @returns {Object} Decoded state data
-   */
   verifyState(state, maxAge = 10 * 60 * 1000) {
     try {
       const decoded = JSON.parse(Buffer.from(state, 'base64').toString());
@@ -304,10 +253,6 @@ class SSOUtils {
     }
   }
 
-  /**
-   * Generate PKCE code verifier and challenge
-   * @returns {Object} PKCE parameters
-   */
   generatePKCE() {
     const codeVerifier = crypto.randomBytes(32).toString('base64url');
     const codeChallenge = crypto

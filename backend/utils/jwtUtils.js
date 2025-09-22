@@ -12,11 +12,6 @@ class JWTUtils {
     this.refreshTokenExpiry = process.env.JWT_REFRESH_EXPIRY || '7d';
   }
 
-  /**
-   * Generate access token
-   * @param {Object} payload - User data to encode
-   * @returns {string} Access token
-   */
   generateAccessToken(payload) {
     const tokenPayload = {
       userId: payload.id,
@@ -33,11 +28,6 @@ class JWTUtils {
     });
   }
 
-  /**
-   * Generate refresh token
-   * @param {Object} payload - User data to encode
-   * @returns {string} Refresh token
-   */
   generateRefreshToken(payload) {
     const tokenPayload = {
       userId: payload.id,
@@ -52,11 +42,6 @@ class JWTUtils {
     });
   }
 
-  /**
-   * Generate both access and refresh tokens
-   * @param {Object} user - User object
-   * @returns {Object} Object containing access and refresh tokens
-   */
   generateTokenPair(user) {
     return {
       accessToken: this.generateAccessToken(user),
@@ -65,11 +50,6 @@ class JWTUtils {
     };
   }
 
-  /**
-   * Verify access token
-   * @param {string} token - Access token to verify
-   * @returns {Object} Decoded token payload
-   */
   verifyAccessToken(token) {
     try {
       return jwt.verify(token, this.secretKey, {
@@ -81,11 +61,6 @@ class JWTUtils {
     }
   }
 
-  /**
-   * Verify refresh token
-   * @param {string} token - Refresh token to verify
-   * @returns {Object} Decoded token payload
-   */
   verifyRefreshToken(token) {
     try {
       return jwt.verify(token, this.refreshSecretKey, {
@@ -97,12 +72,6 @@ class JWTUtils {
     }
   }
 
-  /**
-   * Generate API token for service-to-service communication
-   * @param {Object} payload - Token payload
-   * @param {string} expiresIn - Token expiry (optional)
-   * @returns {string} API token
-   */
   generateApiToken(payload, expiresIn = '1y') {
     const tokenPayload = {
       ...payload,
@@ -117,11 +86,6 @@ class JWTUtils {
     });
   }
 
-  /**
-   * Verify API token
-   * @param {string} token - API token to verify
-   * @returns {Object} Decoded token payload
-   */
   verifyApiToken(token) {
     try {
       return jwt.verify(token, this.secretKey, {
@@ -133,20 +97,10 @@ class JWTUtils {
     }
   }
 
-  /**
-   * Decode token without verification (for debugging)
-   * @param {string} token - Token to decode
-   * @returns {Object} Decoded token payload
-   */
   decodeToken(token) {
     return jwt.decode(token);
   }
 
-  /**
-   * Check if token is expired
-   * @param {string} token - Token to check
-   * @returns {boolean} True if expired
-   */
   isTokenExpired(token) {
     try {
       const decoded = jwt.decode(token);
@@ -159,11 +113,6 @@ class JWTUtils {
     }
   }
 
-  /**
-   * Extract token from Authorization header
-   * @param {string} authHeader - Authorization header value
-   * @returns {string|null} Extracted token or null
-   */
   extractTokenFromHeader(authHeader) {
     if (!authHeader) return null;
     
@@ -173,11 +122,6 @@ class JWTUtils {
     return parts[1];
   }
 
-  /**
-   * Generate secure random token for password reset, email verification, etc.
-   * @param {number} length - Token length (default: 32)
-   * @returns {string} Random token
-   */
   generateSecureToken(length = 32) {
     return crypto.randomBytes(length).toString('hex');
   }

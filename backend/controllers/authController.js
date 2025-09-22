@@ -240,12 +240,11 @@ export const enableMFA = asyncHandler(async (req, res) => {
   const userId = req.user.id;
 
   try {
-    await authService.enableMFA(userId, token, secret);
+    const { backupCodes } = await authService.enableMFA(userId, token, secret);
 
     // Log MFA enablement
     await auditService.logAuthEvent('mfa_enabled', userId, {}, req.ip);
-
-    sendSuccessResponse(res, 'MFA enabled successfully');
+    sendSuccessResponse(res, 'MFA enabled successfully', { backupCodes });
   } catch (error) {
     logger.error('MFA enable failed', { error: error.message, userId });
     sendErrorResponse(res, error.message, 400);
@@ -426,9 +425,13 @@ export const completePasswordResetValidation = [
 
 export const mfaValidation = [
   body('token')
-    .isLength({ min: 6, max: 6 })
-    .isNumeric()
-    .withMessage('MFA token must be 6 digits'),
+    .custom((value) => {
+      if (!value) return false;
+      const isTotp = /^\d{6}$/.test(value);
+      const isBackup = /^[A-F0-9]{8}$/i.test(value);
+      return isTotp || isBackup;
+    })
+    .withMessage('Provide a 6-digit code or 8-character backup code'),
   body('secret')
     .optional()
     .isLength({ min: 32 })

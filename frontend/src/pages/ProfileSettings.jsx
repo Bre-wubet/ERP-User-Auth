@@ -19,9 +19,10 @@ import {
 import { Link } from 'react-router-dom';
 import { authAPI, userAPI } from '../services/api';
 import Button from '../components/ui/Button';
-import Input from '../components/ui/Input';
-import Card from '../components/ui/Card';
 import Modal from '../components/ui/Modal';
+import ProfileTab from './profile/ProfileTab';
+import SecurityTab from './profile/SecurityTab';
+import SessionsTab from './profile/SessionsTab';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import QRCode from 'qrcode';
@@ -96,13 +97,20 @@ const ProfileSettings = () => {
   });
 
   // Enable MFA mutation
+  const [backupCodes, setBackupCodes] = useState([]);
   const enableMFAMutation = useMutation({
     mutationFn: authAPI.enableMFA,
-    onSuccess: () => {
+    onSuccess: (res) => {
       queryClient.invalidateQueries(['user-profile']);
       setShowMFAModal(false);
       setShowQRCode(false);
-      toast.success('MFA enabled successfully');
+      const codes = res?.data?.data?.backupCodes || [];
+      if (codes.length) {
+        setBackupCodes(codes);
+        toast.success('MFA enabled. Save your backup codes.');
+      } else {
+        toast.success('MFA enabled successfully');
+      }
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to enable MFA');
@@ -169,7 +177,8 @@ const ProfileSettings = () => {
   };
 
   const handleEnableMFA = (data) => {
-    enableMFAMutation.mutate(data);
+    // Ensure we send both token and the secret returned from setup
+    enableMFAMutation.mutate({ token: data.token, secret: mfaSecret });
   };
 
   const handleDisableMFA = () => {
@@ -250,373 +259,45 @@ const ProfileSettings = () => {
           setupMFALoading={setupMFAMutation.isPending}
           enableMFALoading={enableMFAMutation.isPending}
           disableMFALoading={disableMFAMutation.isPending}
+          mfaSecret={mfaSecret}
+          qrCodeUrl={qrCodeUrl}
+          showQRCode={showQRCode}
+          setShowQRCode={setShowQRCode}
+          showMFAModal={showMFAModal}
+          setShowMFAModal={setShowMFAModal}
         />
       )}
 
       {/* Sessions Tab */}
       {activeTab === 'sessions' && (
-        <SessionsTab 
-          sessions={sessions} 
-          onRevokeSession={(id) => revokeSessionMutation.mutate(id)}
-          onRevokeAll={() => logoutAllSessionsMutation.mutate()}
-          revokeLoading={revokeSessionMutation.isPending}
-          revokeAllLoading={logoutAllSessionsMutation.isPending}
-        />
+        <SessionsTab userId={user?.id} />
       )}
 
-      {/* Change Password Modal */}
+      
+
+      {/* Backup Codes Modal */}
       <Modal
-        isOpen={showPasswordModal}
-        onClose={() => setShowPasswordModal(false)}
-        title="Change Password"
+        isOpen={backupCodes.length > 0}
+        onClose={() => setBackupCodes([])}
+        title="Your MFA Backup Codes"
       >
-        <ChangePasswordForm
-          onSubmit={handleChangePassword}
-          onCancel={() => setShowPasswordModal(false)}
-          loading={changePasswordMutation.isPending}
-        />
-      </Modal>
-
-      {/* MFA Setup Modal */}
-      <Modal
-        isOpen={showMFAModal}
-        onClose={() => {
-          setShowMFAModal(false);
-          setShowQRCode(false);
-        }}
-        title="Setup Two-Factor Authentication"
-        size="lg"
-      >
-        <MFASetupForm
-          mfaSecret={mfaSecret}
-          qrCodeUrl={qrCodeUrl}
-          showQRCode={showQRCode}
-          onSubmit={handleEnableMFA}
-          onCancel={() => {
-            setShowMFAModal(false);
-            setShowQRCode(false);
-          }}
-          loading={enableMFAMutation.isPending}
-        />
-      </Modal>
-    </div>
-  );
-};
-
-// Profile Tab Component
-const ProfileTab = ({ user, onSubmit, onResendVerification, loading, resendLoading }) => {
-  const { register, handleSubmit, formState: { errors } } = useForm({
-    defaultValues: {
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
-      email: user?.email || '',
-    }
-  });
-
-  const onLocalSubmit = (data) => {
-    // Prevent email updates directly if unverified? Optional policy
-    onSubmit({ firstName: data.firstName.trim(), lastName: data.lastName.trim() });
-  };
-
-  return (
-    <Card>
-      <form onSubmit={handleSubmit(onLocalSubmit)} className="space-y-6">
-        <div>
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="First Name"
-              {...register('firstName', { required: 'First name is required' })}
-              error={errors.firstName?.message}
-            />
-            <Input
-              label="Last Name"
-              {...register('lastName', { required: 'Last name is required' })}
-              error={errors.lastName?.message}
-            />
-          </div>
-
-          <div className="mt-4">
-            <div className="flex items-center justify-between">
-              <Input
-                label="Email Address"
-                type="email"
-                {...register('email', { 
-                  required: 'Email is required',
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: 'Invalid email address'
-                  }
-                })}
-                error={errors.email?.message}
-                className="flex-1"
-              />
-              <div className="ml-4 flex items-center">
-                {user?.emailVerified ? (
-                  <div className="flex items-center text-green-600">
-                    <CheckCircle className="h-5 w-5 mr-1" />
-                    <span className="text-sm font-medium">Verified</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center">
-                    <XCircle className="h-5 w-5 mr-1 text-red-500" />
-                    <span className="text-sm text-red-500 mr-2">Unverified</span>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={onResendVerification}
-                      loading={resendLoading}
-                    >
-                      Verify
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Account Information</h3>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Role</label>
-              <p className="mt-1 text-sm text-gray-900">{user?.role?.name || 'No Role'}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Account Status</label>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${
-                user?.isActive 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-red-100 text-red-800'
-              }`}>
-                {user?.isActive ? 'Active' : 'Inactive'}
-              </span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Member Since</label>
-              <p className="mt-1 text-sm text-gray-900">
-                {user?.createdAt ? format(new Date(user.createdAt), 'MMM dd, yyyy') : 'N/A'}
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Last Login</label>
-              <p className="mt-1 text-sm text-gray-900">
-                {user?.lastLogin ? format(new Date(user.lastLogin), 'MMM dd, yyyy HH:mm') : 'Never'}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-end">
-          <Button type="submit" loading={loading} icon={<Save className="h-5 w-5" />}>
-            Save Changes
-          </Button>
-        </div>
-      </form>
-    </Card>
-  );
-};
-
-// Security Tab Component
-const SecurityTab = ({ 
-  user, 
-  onChangePassword, 
-  onSetupMFA, 
-  onEnableMFA, 
-  onDisableMFA,
-  changePasswordLoading,
-  setupMFALoading,
-  enableMFALoading,
-  disableMFALoading
-}) => {
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [showMFAModal, setShowMFAModal] = useState(false);
-  const [passwordScore, setPasswordScore] = useState(0);
-
-  return (
-    <div className="space-y-6">
-      {/* Password Section */}
-      <Card>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Key className="h-8 w-8 text-blue-500 mr-3" />
-            <div>
-              <h3 className="text-lg font-medium text-gray-900">Password</h3>
-              <p className="text-sm text-gray-500">Update your password to keep your account secure</p>
-            </div>
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => setShowPasswordModal(true)}
-          >
-            Change Password
-          </Button>
-        </div>
-        <div className="mt-4 bg-blue-50 border border-blue-200 rounded-md p-3 text-sm text-blue-800">
-          Use at least 12 characters with upper, lower, number and special characters. Avoid common words.
-        </div>
-        <div className="mt-4 flex items-center space-x-3">
-          <Link
-            to="/forgot-password"
-            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-50"
-          >
-            Forgot password
-          </Link>
-          <Link
-            to="/reset-password"
-            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-50"
-          >
-            Have a token? Reset here
-          </Link>
-        </div>
-      </Card>
-
-      {/* MFA Section */}
-      <Card>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Smartphone className="h-8 w-8 text-green-500 mr-3" />
-            <div>
-              <h3 className="text-lg font-medium text-gray-900">Two-Factor Authentication</h3>
-              <p className="text-sm text-gray-500">
-                {user?.mfaSecret 
-                  ? 'MFA is enabled for your account' 
-                  : 'Add an extra layer of security to your account'
-                }
-              </p>
-            </div>
-          </div>
-          <div className="flex space-x-2">
-            {user?.mfaSecret ? (
-              <Button
-                variant="destructive"
-                onClick={onDisableMFA}
-                loading={disableMFALoading}
-              >
-                Disable MFA
-              </Button>
-            ) : (
-              <Button
-                onClick={() => {
-                  onSetupMFA();
-                  setShowMFAModal(true);
-                }}
-                loading={setupMFALoading}
-              >
-                Setup MFA
-              </Button>
-            )}
-          </div>
-        </div>
-      </Card>
-
-      {/* Security Recommendations */}
-      <Card>
-        <div className="flex items-start">
-          <AlertTriangle className="h-6 w-6 text-yellow-500 mr-3 mt-1" />
-          <div>
-            <h3 className="text-lg font-medium text-gray-900">Security Recommendations</h3>
-            <ul className="mt-2 text-sm text-gray-600 space-y-1">
-              <li>• Use a strong, unique password</li>
-              <li>• Enable two-factor authentication</li>
-              <li>• Regularly review your active sessions</li>
-              <li>• Log out from shared or public devices</li>
-            </ul>
-          </div>
-        </div>
-      </Card>
-    </div>
-  );
-};
-
-// Sessions Tab Component
-const SessionsTab = ({ sessions, onRevokeSession, onRevokeAll, revokeLoading, revokeAllLoading }) => {
-  const [showPassword, setShowPassword] = useState({});
-
-  const togglePasswordVisibility = (sessionId) => {
-    setShowPassword(prev => ({
-      ...prev,
-      [sessionId]: !prev[sessionId]
-    }));
-  };
-
-  return (
-    <Card>
-      <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Active Sessions</h3>
-        <p className="text-sm text-gray-500 mb-6">
-          Manage your active sessions across different devices and browsers
-        </p>
-        <div className="flex items-center justify-between mb-4">
-          <div className="text-sm text-gray-600">
-            Total: {sessions.length}
-          </div>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={onRevokeAll}
-            loading={revokeAllLoading}
-            disabled={sessions.length === 0}
-          >
-            Revoke All Sessions
-          </Button>
-        </div>
-
-        {sessions.length === 0 ? (
-          <div className="text-center py-8">
-            <Smartphone className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500">No active sessions found</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {sessions.map((session) => (
-              <div key={session.id} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Smartphone className="h-6 w-6 text-gray-400 mr-3" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        {session.userAgent || 'Unknown Device'}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        IP: {session.ip || 'Unknown'} • 
-                        Created: {format(new Date(session.createdAt), 'MMM dd, yyyy HH:mm')}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Expires: {format(new Date(session.expiresAt), 'MMM dd, yyyy HH:mm')}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      new Date(session.expiresAt) > new Date()
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {new Date(session.expiresAt) > new Date() ? 'Active' : 'Expired'}
-                    </span>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => onRevokeSession(session.id)}
-                      loading={revokeLoading}
-                    >
-                      Revoke
-                    </Button>
-                  </div>
-                </div>
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600">
+            Store these codes in a safe place. Each code can be used once if you lose access to your authenticator app.
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {backupCodes.map((code) => (
+              <div key={code} className="font-mono text-sm p-2 bg-gray-50 border rounded text-gray-900">
+                {code}
               </div>
             ))}
           </div>
-        )}
-      </div>
-    </Card>
+          <div className="flex justify-end">
+            <Button onClick={() => setBackupCodes([])}>I have saved these</Button>
+          </div>
+        </div>
+      </Modal>
+    </div>
   );
 };
 
