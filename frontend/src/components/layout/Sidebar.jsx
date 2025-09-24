@@ -51,6 +51,30 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
       roles: ['admin', 'auditor'],
     },
     {
+      name: 'MFA Management',
+      href: '/mfa-management',
+      icon: Shield,
+      roles: ['admin', 'manager', 'hr', 'user'],
+    },
+    {
+      name: 'Session Management',
+      href: '/session-management',
+      icon: Shield,
+      roles: ['admin', 'manager', 'hr', 'user'],
+    },
+    {
+      name: 'System Health',
+      href: '/system-health',
+      icon: Shield,
+      roles: ['admin'],
+    },
+    {
+      name: 'Admin Tools',
+      href: '/admin-tools',
+      icon: Shield,
+      roles: ['admin'],
+    },
+    {
       name: 'Profile',
       href: '/profile',
       icon: User,

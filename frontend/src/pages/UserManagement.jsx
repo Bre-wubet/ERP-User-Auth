@@ -13,7 +13,9 @@ import {
   Filter,
   Download,
   RefreshCw,
-  AlertTriangle
+  AlertTriangle,
+  Activity,
+  Smartphone
 } from 'lucide-react';
 import { userAPI, roleAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -35,6 +37,8 @@ const UserManagement = () => {
   const [selectedRole, setSelectedRole] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showUserStatsModal, setShowUserStatsModal] = useState(false);
+  const [showUserSessionsModal, setShowUserSessionsModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -72,9 +76,9 @@ const UserManagement = () => {
     enabled: canManageUsers, // Only fetch if user has permission
   });
 
-  const users = Array.isArray(usersData?.data) ? usersData.data : [];
-  const pagination = usersData?.pagination || {};
-  const roles = Array.isArray(rolesData?.data) ? rolesData.data : [];
+  const users = Array.isArray(usersData?.data?.data) ? usersData.data.data : Array.isArray(usersData?.data) ? usersData.data : [];
+  const pagination = usersData?.data?.pagination || usersData?.pagination || {};
+  const roles = Array.isArray(rolesData?.data?.data) ? rolesData.data.data : Array.isArray(rolesData?.data) ? rolesData.data : [];
 
   // Debug logging
   console.log('UserManagement Debug:', {
@@ -173,6 +177,16 @@ const UserManagement = () => {
     setShowEditModal(true);
   };
 
+  const openUserStatsModal = (user) => {
+    setSelectedUser(user);
+    setShowUserStatsModal(true);
+  };
+
+  const openUserSessionsModal = (user) => {
+    setSelectedUser(user);
+    setShowUserSessionsModal(true);
+  };
+
   const columns = [
     {
       key: 'name',
@@ -219,20 +233,40 @@ const UserManagement = () => {
       key: 'actions',
       label: 'Actions',
       render: (user) => (
-        <div className="flex space-x-2">
+        <div className="flex space-x-1">
           <Button
             size="sm"
             variant="outline"
             onClick={() => openEditModal(user)}
             icon={<Edit className="h-4 w-4" />}
+            title="Edit User"
           >
             Edit
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => openUserStatsModal(user)}
+            icon={<Activity className="h-4 w-4" />}
+            title="View Statistics"
+          >
+            Stats
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => openUserSessionsModal(user)}
+            icon={<Smartphone className="h-4 w-4" />}
+            title="View Sessions"
+          >
+            Sessions
           </Button>
           <Button
             size="sm"
             variant={user.isActive ? "outline" : "primary"}
             onClick={() => handleToggleStatus(user)}
             icon={user.isActive ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+            title={user.isActive ? 'Deactivate User' : 'Activate User'}
           >
             {user.isActive ? 'Deactivate' : 'Activate'}
           </Button>
@@ -241,6 +275,7 @@ const UserManagement = () => {
             variant="destructive"
             onClick={() => handleDeleteUser(user.id)}
             icon={<Trash2 className="h-4 w-4" />}
+            title="Delete User"
           >
             Delete
           </Button>
@@ -392,6 +427,36 @@ const UserManagement = () => {
           />
         )}
       </Modal>
+
+      {/* User Statistics Modal */}
+      <Modal
+        isOpen={showUserStatsModal}
+        onClose={() => {
+          setShowUserStatsModal(false);
+          setSelectedUser(null);
+        }}
+        title={`User Statistics - ${selectedUser?.firstName} ${selectedUser?.lastName}`}
+        size="lg"
+      >
+        {selectedUser && (
+          <UserStatsDisplay userId={selectedUser.id} />
+        )}
+      </Modal>
+
+      {/* User Sessions Modal */}
+      <Modal
+        isOpen={showUserSessionsModal}
+        onClose={() => {
+          setShowUserSessionsModal(false);
+          setSelectedUser(null);
+        }}
+        title={`User Sessions - ${selectedUser?.firstName} ${selectedUser?.lastName}`}
+        size="lg"
+      >
+        {selectedUser && (
+          <UserSessionsDisplay userId={selectedUser.id} />
+        )}
+      </Modal>
     </div>
   );
 };
@@ -540,6 +605,133 @@ const EditUserForm = ({ user, roles, onSubmit, onCancel, loading }) => {
         </Button>
       </div>
     </form>
+  );
+};
+
+// User Statistics Display Component
+const UserStatsDisplay = ({ userId }) => {
+  const { data: statsData, isLoading: statsLoading } = useQuery({
+    queryKey: ['user-stats', userId],
+    queryFn: () => userAPI.getUserStats(userId),
+  });
+
+  const stats = statsData?.data || {};
+
+  if (statsLoading) {
+    return (
+      <div className="flex items-center justify-center h-32">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-blue-50 p-4 rounded-lg">
+          <div className="text-2xl font-bold text-blue-600">{stats.totalLogins || 0}</div>
+          <div className="text-sm text-blue-800">Total Logins</div>
+        </div>
+        <div className="bg-green-50 p-4 rounded-lg">
+          <div className="text-2xl font-bold text-green-600">{stats.lastLoginDays || 0}</div>
+          <div className="text-sm text-green-800">Days Since Last Login</div>
+        </div>
+        <div className="bg-purple-50 p-4 rounded-lg">
+          <div className="text-2xl font-bold text-purple-600">{stats.activeSessions || 0}</div>
+          <div className="text-sm text-purple-800">Active Sessions</div>
+        </div>
+        <div className="bg-orange-50 p-4 rounded-lg">
+          <div className="text-2xl font-bold text-orange-600">{stats.failedLogins || 0}</div>
+          <div className="text-sm text-orange-800">Failed Logins</div>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <h4 className="font-medium text-gray-900">Login History</h4>
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <div className="text-sm text-gray-600">
+            Last Login: {stats.lastLoginAt ? format(new Date(stats.lastLoginAt), 'PPpp') : 'Never'}
+          </div>
+          <div className="text-sm text-gray-600">
+            Account Created: {stats.createdAt ? format(new Date(stats.createdAt), 'PPpp') : 'Unknown'}
+          </div>
+          <div className="text-sm text-gray-600">
+            Email Verified: {stats.emailVerified ? 'Yes' : 'No'}
+          </div>
+          <div className="text-sm text-gray-600">
+            MFA Enabled: {stats.mfaEnabled ? 'Yes' : 'No'}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// User Sessions Display Component
+const UserSessionsDisplay = ({ userId }) => {
+  const { data: sessionsData, isLoading: sessionsLoading } = useQuery({
+    queryKey: ['user-sessions', userId],
+    queryFn: () => userAPI.getUserSessions(userId),
+  });
+
+  const sessions = Array.isArray(sessionsData?.data?.data) ? sessionsData.data.data : Array.isArray(sessionsData?.data) ? sessionsData.data : [];
+
+  if (sessionsLoading) {
+    return (
+      <div className="flex items-center justify-center h-32">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h4 className="font-medium text-gray-900">Active Sessions</h4>
+        <span className="text-sm text-gray-600">{sessions.length} sessions</span>
+      </div>
+
+      <div className="space-y-3">
+        {sessions.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            No active sessions found
+          </div>
+        ) : (
+          sessions.map((session) => (
+            <div key={session.id} className="border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <Smartphone className="h-5 w-5 text-gray-400 mr-3" />
+                  <div>
+                    <div className="font-medium text-gray-900">
+                      {session.deviceName || 'Unknown Device'}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {session.location || 'Unknown Location'} • {session.ip || 'Unknown IP'}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-gray-900">
+                    {session.lastActivityAt 
+                      ? format(new Date(session.lastActivityAt), 'MMM dd, HH:mm')
+                      : 'Never'
+                    }
+                  </div>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    session.isActive 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {session.isActive ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
   );
 };
 

@@ -388,10 +388,16 @@ export const AuthProvider = ({ children }) => {
   // Check if user has role
   const hasRole = (requiredRoles) => {
     if (!state.user?.role) return false;
-    const userRole = state.user.role.name;
-    return Array.isArray(requiredRoles) 
-      ? requiredRoles.includes(userRole)
-      : userRole === requiredRoles;
+    const userRole = state.user.role.name.toLowerCase();
+    
+    // Admin has access to everything
+    if (userRole === 'admin') return true;
+    
+    const normalizedRequiredRoles = Array.isArray(requiredRoles) 
+      ? requiredRoles.map(role => role.toLowerCase())
+      : [requiredRoles.toLowerCase()];
+    
+    return normalizedRequiredRoles.includes(userRole);
   };
 
   // Check if user has permission

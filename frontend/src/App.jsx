@@ -22,6 +22,10 @@ import UserManagement from './pages/UserManagement';
 import RoleManagement from './pages/RoleManagement';
 import AuditLogs from './pages/AuditLogs';
 import ProfileSettings from './pages/ProfileSettings';
+import SessionManagement from './pages/SessionManagement';
+import SystemHealth from './pages/SystemHealth';
+import AdminTools from './pages/AdminTools';
+import MFAManagement from './pages/MFAManagement'; // MFAManagement
 
 // Create a client
 const queryClient = new QueryClient({
@@ -176,6 +180,86 @@ function App() {
                                 <Navbar onMenuToggle={toggleSidebar} />
                                 <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
                                   <ProfileSettings />
+                                </main>
+                              </div>
+                            </div>
+                          </PrivateRoute>
+                        }
+                      />
+
+                      <Route
+                        path="/session-management"
+                        element={
+                          <PrivateRoute>
+                            <div className="flex h-screen">
+                              <Sidebar
+                                isCollapsed={sidebarCollapsed}
+                                onToggle={toggleSidebar}
+                              />
+                              <div className="flex-1 flex flex-col overflow-hidden">
+                                <Navbar onMenuToggle={toggleSidebar} />
+                                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+                                  <SessionManagement />
+                                </main>
+                              </div>
+                            </div>
+                          </PrivateRoute>
+                        }
+                      />
+
+                      <Route
+                        path="/system-health"
+                        element={
+                          <PrivateRoute>
+                            <div className="flex h-screen">
+                              <Sidebar
+                                isCollapsed={sidebarCollapsed}
+                                onToggle={toggleSidebar}
+                              />
+                              <div className="flex-1 flex flex-col overflow-hidden">
+                                <Navbar onMenuToggle={toggleSidebar} />
+                                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+                                  <SystemHealth />
+                                </main>
+                              </div>
+                            </div>
+                          </PrivateRoute>
+                        }
+                      />
+
+                      <Route
+                        path="/admin-tools"
+                        element={
+                          <PrivateRoute>
+                            <div className="flex h-screen">
+                              <Sidebar
+                                isCollapsed={sidebarCollapsed}
+                                onToggle={toggleSidebar}
+                              />
+                              <div className="flex-1 flex flex-col overflow-hidden">
+                                <Navbar onMenuToggle={toggleSidebar} />
+                                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+                                  <AdminTools />
+                                </main>
+                              </div>
+                            </div>
+                          </PrivateRoute>
+                        }
+                      />
+
+                      <Route
+                        path="/mfa-management"
+                        element={
+                          <PrivateRoute>
+                            <div className="flex h-screen">
+                              <Sidebar
+                                isCollapsed={sidebarCollapsed}
+                                onToggle={toggleSidebar}
+                              />
+                              <div className="flex-1 flex flex-col overflow-hidden">
+                                <Navbar onMenuToggle={toggleSidebar} />
+                                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+                                  <MFAManagement />
                                 </main>
                               </div>
                             </div>

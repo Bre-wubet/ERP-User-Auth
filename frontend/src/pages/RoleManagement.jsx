@@ -12,7 +12,8 @@ import {
   RefreshCw,
   UserPlus,
   UserMinus,
-  AlertTriangle
+  AlertTriangle,
+  Activity
 } from 'lucide-react';
 import { roleAPI, userAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -33,6 +34,8 @@ const RoleManagement = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showRoleStatsModal, setShowRoleStatsModal] = useState(false);
+  const [showScopesModal, setShowScopesModal] = useState(false);
   const [selectedRole, setSelectedRole] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -62,9 +65,38 @@ const RoleManagement = () => {
     enabled: canManageRoles, // Only fetch if user has permission
   });
 
-  const roles = rolesData?.data || [];
-  const pagination = rolesData?.pagination || {};
-  const users = usersData?.data || [];
+  // Fetch role statistics (only if user has permission)
+  const { data: roleStatsData } = useQuery({
+    queryKey: ['role-stats'],
+    queryFn: roleAPI.getRoleStats,
+    enabled: canManageRoles,
+  });
+
+  // Fetch available scopes (only if user has permission)
+  const { data: scopesData } = useQuery({
+    queryKey: ['available-scopes'],
+    queryFn: roleAPI.getAvailableScopes,
+    enabled: canManageRoles,
+  });
+
+  // Extract roles from the nested data structure
+  const roles = Array.isArray(rolesData?.data?.data) 
+    ? rolesData.data.data 
+    : Array.isArray(rolesData?.data) 
+    ? rolesData.data 
+    : Array.isArray(rolesData?.data?.roles) 
+    ? rolesData.data.roles 
+    : Array.isArray(rolesData?.data?.items) 
+    ? rolesData.data.items 
+    : Array.isArray(rolesData?.data?.results) 
+    ? rolesData.data.results 
+    : Array.isArray(rolesData?.roles) 
+    ? rolesData.roles 
+    : [];
+  const pagination = rolesData?.data?.pagination || {};
+  const users = Array.isArray(usersData?.data) ? usersData.data : [];
+  const roleStats = roleStatsData?.data || {};
+  const availableScopes = Array.isArray(scopesData?.data) ? scopesData.data : [];
 
   // Create role mutation
   const createRoleMutation = useMutation({
@@ -153,6 +185,15 @@ const RoleManagement = () => {
     setShowAssignModal(true);
   };
 
+  const openRoleStatsModal = (role) => {
+    setSelectedRole(role);
+    setShowRoleStatsModal(true);
+  };
+
+  const openScopesModal = () => {
+    setShowScopesModal(true);
+  };
+
   const columns = [
     {
       key: 'name',
@@ -160,7 +201,16 @@ const RoleManagement = () => {
       render: (role) => (
         <div className="flex items-center">
           <Shield className="h-5 w-5 text-blue-500 mr-2" />
-          <span className="font-medium">{role.name}</span>
+          <div>
+            <span className="font-medium text-gray-900">
+              {role.name.charAt(0).toUpperCase() + role.name.slice(1)}
+            </span>
+            {role.scope && (
+              <div className="text-xs text-gray-500">
+                Scope: {role.scope}
+              </div>
+            )}
+          </div>
         </div>
       ),
     },
@@ -180,12 +230,20 @@ const RoleManagement = () => {
     {
       key: 'userCount',
       label: 'Users',
-      render: (role) => (
-        <div className="flex items-center">
-          <Users className="h-4 w-4 text-gray-400 mr-1" />
-          <span>{role._aggr_count_users || 0}</span>
-        </div>
-      ),
+      render: (role) => {
+        const userCount = role._count?.users || 0;
+        return (
+          <div className="flex items-center">
+            <Users className={`h-4 w-4 mr-1 ${userCount > 0 ? 'text-green-500' : 'text-gray-400'}`} />
+            <span className={`font-medium ${userCount > 0 ? 'text-green-700' : 'text-gray-500'}`}>
+              {userCount}
+            </span>
+            {userCount > 0 && (
+              <span className="ml-1 text-xs text-green-600">Active</span>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: 'createdAt',
@@ -193,23 +251,57 @@ const RoleManagement = () => {
       render: (role) => format(new Date(role.createdAt), 'MMM dd, yyyy'),
     },
     {
+      key: 'updatedAt',
+      label: 'Last Updated',
+      render: (role) => (
+        <div className="text-sm text-gray-600">
+          {format(new Date(role.updatedAt), 'MMM dd, yyyy')}
+        </div>
+      ),
+    },
+    {
       key: 'actions',
       label: 'Actions',
       render: (role) => (
-        <div className="flex space-x-2">
+        <div className="flex space-x-1">
           <Button
             size="sm"
             variant="outline"
             onClick={() => openEditModal(role)}
             icon={<Edit className="h-4 w-4" />}
+            title="Edit Role"
           >
             Edit
           </Button>
           <Button
             size="sm"
+            variant="outline"
+            onClick={() => openRoleStatsModal(role)}
+            icon={<Activity className="h-4 w-4" />}
+            title="View Statistics"
+          >
+            Stats
+          </Button>
+          {role._count?.users > 0 && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                // TODO: Implement view users functionality
+                toast.info(`Viewing users for ${role.name} role`);
+              }}
+              icon={<Users className="h-4 w-4" />}
+              title="View Users"
+            >
+              Users
+            </Button>
+          )}
+          <Button
+            size="sm"
             variant="primary"
             onClick={() => openAssignModal(role)}
             icon={<UserPlus className="h-4 w-4" />}
+            title="Assign to User"
           >
             Assign
           </Button>
@@ -218,6 +310,7 @@ const RoleManagement = () => {
             variant="destructive"
             onClick={() => handleDeleteRole(role.id)}
             icon={<Trash2 className="h-4 w-4" />}
+            title="Delete Role"
           >
             Delete
           </Button>
@@ -261,12 +354,67 @@ const RoleManagement = () => {
           <h1 className="text-2xl font-bold text-gray-900">Role Management</h1>
           <p className="text-gray-600">Manage roles, permissions, and user assignments</p>
         </div>
-        <Button
-          onClick={() => setShowCreateModal(true)}
-          icon={<Plus className="h-5 w-5" />}
-        >
-          Create Role
-        </Button>
+        <div className="flex space-x-2">
+          <Button
+            variant="outline"
+            onClick={openScopesModal}
+            icon={<Shield className="h-5 w-5" />}
+          >
+            View Scopes
+          </Button>
+          <Button
+            onClick={() => setShowCreateModal(true)}
+            icon={<Plus className="h-5 w-5" />}
+          >
+            Create Role
+          </Button>
+        </div>
+      </div>
+
+      {/* Role Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <div className="flex items-center">
+            <Shield className="h-8 w-8 text-blue-500" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Total Roles</p>
+              <p className="text-2xl font-bold text-gray-900">{roles.length}</p>
+            </div>
+          </div>
+        </Card>
+        <Card>
+          <div className="flex items-center">
+            <Users className="h-8 w-8 text-green-500" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Total Users</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {roles.reduce((total, role) => total + (role._count?.users || 0), 0)}
+              </p>
+            </div>
+          </div>
+        </Card>
+        <Card>
+          <div className="flex items-center">
+            <Activity className="h-8 w-8 text-purple-500" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Roles with Users</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {roles.filter(role => (role._count?.users || 0) > 0).length}
+              </p>
+            </div>
+          </div>
+        </Card>
+        <Card>
+          <div className="flex items-center">
+            <Filter className="h-8 w-8 text-orange-500" />
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-500">Unique Scopes</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {new Set(roles.map(role => role.scope).filter(Boolean)).size}
+              </p>
+            </div>
+          </div>
+        </Card>
       </div>
 
       {/* Filters */}
@@ -290,6 +438,40 @@ const RoleManagement = () => {
           >
             Reset
           </Button>
+        </div>
+      </Card>
+
+      {/* Role Overview */}
+      <Card>
+        <div className="p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Role Overview</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {roles.map((role) => (
+              <div key={role.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center">
+                    <Shield className="h-5 w-5 text-blue-500 mr-2" />
+                    <span className="font-medium text-gray-900">
+                      {role.name.charAt(0).toUpperCase() + role.name.slice(1)}
+                    </span>
+                  </div>
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    (role._count?.users || 0) > 0 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {(role._count?.users || 0)} users
+                  </span>
+                </div>
+                <div className="text-sm text-gray-600 mb-2">
+                  {role.scope ? `Scope: ${role.scope}` : 'Global scope'}
+                </div>
+                <div className="text-xs text-gray-500">
+                  Created: {format(new Date(role.createdAt), 'MMM dd, yyyy')}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </Card>
 
@@ -366,6 +548,31 @@ const RoleManagement = () => {
             loading={assignRoleMutation.isPending}
           />
         )}
+      </Modal>
+
+      {/* Role Statistics Modal */}
+      <Modal
+        isOpen={showRoleStatsModal}
+        onClose={() => {
+          setShowRoleStatsModal(false);
+          setSelectedRole(null);
+        }}
+        title={`Role Statistics - ${selectedRole?.name}`}
+        size="lg"
+      >
+        {selectedRole && (
+          <RoleStatsDisplay role={selectedRole} />
+        )}
+      </Modal>
+
+      {/* Available Scopes Modal */}
+      <Modal
+        isOpen={showScopesModal}
+        onClose={() => setShowScopesModal(false)}
+        title="Available Scopes"
+        size="lg"
+      >
+        <ScopesDisplay scopes={availableScopes} />
       </Modal>
     </div>
   );
@@ -500,6 +707,131 @@ const AssignRoleForm = ({ role, users, onSubmit, onCancel, loading }) => {
         </Button>
       </div>
     </form>
+  );
+};
+
+// Role Statistics Display Component
+const RoleStatsDisplay = ({ role }) => {
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-blue-50 p-4 rounded-lg">
+          <div className="text-2xl font-bold text-blue-600">{role._aggr_count_users || 0}</div>
+          <div className="text-sm text-blue-800">Assigned Users</div>
+        </div>
+        <div className="bg-green-50 p-4 rounded-lg">
+          <div className="text-2xl font-bold text-green-600">{role.scope ? 'Scoped' : 'Global'}</div>
+          <div className="text-sm text-green-800">Scope Type</div>
+        </div>
+        <div className="bg-purple-50 p-4 rounded-lg">
+          <div className="text-2xl font-bold text-purple-600">
+            {format(new Date(role.createdAt), 'MMM yyyy')}
+          </div>
+          <div className="text-sm text-purple-800">Created</div>
+        </div>
+        <div className="bg-orange-50 p-4 rounded-lg">
+          <div className="text-2xl font-bold text-orange-600">
+            {role.isActive ? 'Active' : 'Inactive'}
+          </div>
+          <div className="text-sm text-orange-800">Status</div>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <h4 className="font-medium text-gray-900">Role Details</h4>
+        <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+          <div className="flex justify-between">
+            <span className="text-sm text-gray-600">Role Name:</span>
+            <span className="text-sm font-medium text-gray-900">{role.name}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-sm text-gray-600">Scope:</span>
+            <span className="text-sm font-medium text-gray-900">{role.scope || 'Global'}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-sm text-gray-600">Created:</span>
+            <span className="text-sm font-medium text-gray-900">
+              {format(new Date(role.createdAt), 'PPpp')}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-sm text-gray-600">Last Updated:</span>
+            <span className="text-sm font-medium text-gray-900">
+              {role.updatedAt ? format(new Date(role.updatedAt), 'PPpp') : 'Never'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {role.description && (
+        <div className="space-y-4">
+          <h4 className="font-medium text-gray-900">Description</h4>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <p className="text-sm text-gray-600">{role.description}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Scopes Display Component
+const ScopesDisplay = ({ scopes }) => {
+  return (
+    <div className="space-y-4">
+      <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+        <div className="flex">
+          <Shield className="h-5 w-5 text-blue-400 mr-2 mt-0.5" />
+          <div>
+            <h4 className="text-sm font-medium text-blue-800">About Scopes</h4>
+            <p className="text-sm text-blue-700 mt-1">
+              Scopes allow you to limit role access to specific modules or areas of the system. 
+              Users with scoped roles can only access features within their assigned scope.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <h4 className="font-medium text-gray-900">Available Scopes</h4>
+        {scopes.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            No scopes available
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {scopes.map((scope, index) => (
+              <div key={index} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center">
+                  <Shield className="h-5 w-5 text-blue-500 mr-3" />
+                  <div>
+                    <div className="font-medium text-gray-900">{scope}</div>
+                    <div className="text-sm text-gray-600">
+                      {scope === 'admin' && 'Full system access'}
+                      {scope === 'management' && 'Management module access'}
+                      {scope === 'hr' && 'Human resources module access'}
+                      {scope === 'finance' && 'Finance module access'}
+                      {scope === 'audit' && 'Audit and compliance access'}
+                      {scope === 'user' && 'Basic user access'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="bg-gray-50 p-4 rounded-lg">
+        <h5 className="text-sm font-medium text-gray-900 mb-2">Scope Usage Guidelines</h5>
+        <ul className="text-sm text-gray-600 space-y-1">
+          <li>• Use scopes to limit access to specific modules</li>
+          <li>• Global roles have access to all modules</li>
+          <li>• Scoped roles are more secure for limited access</li>
+          <li>• Consider using scopes for department-specific roles</li>
+        </ul>
+      </div>
+    </div>
   );
 };
 

@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Card from '../../components/ui/Card';
-import { CheckCircle, XCircle, Save } from 'lucide-react';
+import { CheckCircle, XCircle, Save, Shield, AlertTriangle, Clock, Smartphone } from 'lucide-react';
 
 const ProfileTab = ({ user, onSubmit, onResendVerification, loading, resendLoading }) => {
   const { register, handleSubmit, formState: { errors } } = useForm({
@@ -109,6 +109,97 @@ const ProfileTab = ({ user, onSubmit, onResendVerification, loading, resendLoadi
                 {user?.lastLogin ? format(new Date(user.lastLogin), 'MMM dd, yyyy HH:mm') : 'Never'}
               </p>
             </div>
+          </div>
+        </div>
+
+        {/* Security Status */}
+        <div>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Security Status</h3>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+                <div className={`p-2 rounded-full mr-3 ${
+                  user?.emailVerified ? 'bg-green-100' : 'bg-red-100'
+                }`}>
+                  {user?.emailVerified ? (
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-red-600" />
+                  )}
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-900">Email Verification</div>
+                  <div className={`text-xs ${
+                    user?.emailVerified ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {user?.emailVerified ? 'Verified' : 'Unverified'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+                <div className={`p-2 rounded-full mr-3 ${
+                  user?.mfaEnabled ? 'bg-green-100' : 'bg-yellow-100'
+                }`}>
+                  {user?.mfaEnabled ? (
+                    <Shield className="h-5 w-5 text-green-600" />
+                  ) : (
+                    <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                  )}
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-900">Multi-Factor Auth</div>
+                  <div className={`text-xs ${
+                    user?.mfaEnabled ? 'text-green-600' : 'text-yellow-600'
+                  }`}>
+                    {user?.mfaEnabled ? 'Enabled' : 'Not Enabled'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center p-3 bg-gray-50 rounded-lg">
+                <div className="p-2 rounded-full mr-3 bg-blue-100">
+                  <Clock className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-900">Password Age</div>
+                  <div className="text-xs text-blue-600">
+                    {user?.passwordChangedAt 
+                      ? `${Math.floor((new Date() - new Date(user.passwordChangedAt)) / (1000 * 60 * 60 * 24))} days`
+                      : 'Unknown'
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {!user?.emailVerified && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                <div className="flex">
+                  <AlertTriangle className="h-5 w-5 text-yellow-400 mr-2 mt-0.5" />
+                  <div>
+                    <h4 className="text-sm font-medium text-yellow-800">Email Verification Required</h4>
+                    <p className="text-sm text-yellow-700 mt-1">
+                      Please verify your email address to ensure account security and receive important notifications.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {!user?.mfaEnabled && (
+              <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                <div className="flex">
+                  <Shield className="h-5 w-5 text-blue-400 mr-2 mt-0.5" />
+                  <div>
+                    <h4 className="text-sm font-medium text-blue-800">Enable Multi-Factor Authentication</h4>
+                    <p className="text-sm text-blue-700 mt-1">
+                      Add an extra layer of security to your account by enabling MFA. This helps protect your account from unauthorized access.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

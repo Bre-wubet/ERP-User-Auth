@@ -1,6 +1,9 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../context/AuthContext';
+import { userAPI, roleAPI, auditAPI, healthAPI } from '../services/api';
 import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
 import {
   Users,
   Shield,
@@ -11,7 +14,11 @@ import {
   AlertTriangle,
   CheckCircle,
   Info,
+  RefreshCw,
+  ExternalLink,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { format, subDays } from 'date-fns';
 
 /**
  * Dashboard Page
@@ -19,74 +26,128 @@ import {
  */
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
 
-  // Mock data - in real app, this would come from API
+  // Fetch real data from APIs
+  const { data: usersData, isLoading: usersLoading } = useQuery({
+    queryKey: ['dashboard-users'],
+    queryFn: () => userAPI.getUsers({ limit: 1 }),
+    enabled: hasRole(['admin', 'manager', 'hr']),
+  });
+
+  const { data: rolesData, isLoading: rolesLoading } = useQuery({
+    queryKey: ['dashboard-roles'],
+    queryFn: () => roleAPI.getRoles({ limit: 1 }),
+    enabled: hasRole(['admin', 'manager']),
+  });
+
+  const { data: auditStatsData, isLoading: auditStatsLoading } = useQuery({
+    queryKey: ['dashboard-audit-stats'],
+    queryFn: () => auditAPI.getAuditStats({
+      dateFrom: format(subDays(new Date(), 30), 'yyyy-MM-dd'),
+      dateTo: format(new Date(), 'yyyy-MM-dd'),
+    }),
+    enabled: hasRole(['admin', 'auditor']),
+  });
+
+  const { data: healthData, isLoading: healthLoading, error: healthError } = useQuery({
+    queryKey: ['dashboard-health'],
+    queryFn: healthAPI.getHealth,
+    refetchInterval: 30000, // Refresh every 30 seconds
+    retry: false, // Don't retry on 404 errors
+    enabled: false, // Disable by default since health endpoint might not exist
+  });
+
+  // Calculate stats from real data
+  const totalUsers = usersData?.data?.pagination?.total || usersData?.pagination?.total || 0;
+  const totalRoles = rolesData?.data?.pagination?.total || rolesData?.pagination?.total || 0;
+  const totalAuditEvents = auditStatsData?.data?.totalActions || 0;
+  const todayAuditEvents = auditStatsData?.data?.todayActions || 0;
+  const activeUsers = auditStatsData?.data?.activeUsers || 0;
+
   const stats = [
     {
       name: 'Total Users',
-      value: '1,234',
-      change: '+12%',
+      value: totalUsers.toLocaleString(),
+      change: '+12%', // This would need historical data to calculate
       changeType: 'positive',
       icon: Users,
+      loading: usersLoading,
     },
     {
-      name: 'Active Sessions',
-      value: '89',
+      name: 'Active Users',
+      value: activeUsers.toLocaleString(),
       change: '+5%',
       changeType: 'positive',
       icon: Activity,
+      loading: auditStatsLoading,
     },
     {
-      name: 'Security Alerts',
-      value: '3',
-      change: '-2',
-      changeType: 'negative',
-      icon: AlertTriangle,
+      name: 'Total Roles',
+      value: totalRoles.toLocaleString(),
+      change: '0%',
+      changeType: 'neutral',
+      icon: Shield,
+      loading: rolesLoading,
     },
     {
-      name: 'Audit Events',
-      value: '2,456',
+      name: 'Today\'s Events',
+      value: todayAuditEvents.toLocaleString(),
       change: '+8%',
       changeType: 'positive',
       icon: FileText,
+      loading: auditStatsLoading,
     },
   ];
 
-  const recentActivity = [
-    {
-      id: 1,
-      type: 'user_login',
-      message: 'John Doe logged in',
-      time: '2 minutes ago',
-      icon: CheckCircle,
-      color: 'text-green-500',
-    },
-    {
-      id: 2,
-      type: 'user_created',
-      message: 'New user Jane Smith was created',
-      time: '15 minutes ago',
-      icon: Users,
-      color: 'text-blue-500',
-    },
-    {
-      id: 3,
-      type: 'role_assigned',
-      message: 'Role "Manager" assigned to Mike Johnson',
-      time: '1 hour ago',
-      icon: Shield,
-      color: 'text-purple-500',
-    },
-    {
-      id: 4,
-      type: 'security_alert',
-      message: 'Multiple failed login attempts detected',
-      time: '2 hours ago',
-      icon: AlertTriangle,
-      color: 'text-red-500',
-    },
-  ];
+  // Fetch recent audit logs for activity feed
+  const { data: recentAuditData, isLoading: recentAuditLoading } = useQuery({
+    queryKey: ['dashboard-recent-audit'],
+    queryFn: () => auditAPI.getAuditLogs({ limit: 5 }),
+    enabled: hasRole(['admin', 'auditor']),
+  });
+
+  // Helper functions for activity display
+  const getActivityIcon = (action) => {
+    const iconMap = {
+      'login': CheckCircle,
+      'logout': CheckCircle,
+      'create': Users,
+      'update': Users,
+      'delete': AlertTriangle,
+      'register': Users,
+      'password_reset': Shield,
+      'mfa_enable': Shield,
+      'mfa_disable': Shield,
+    };
+    return iconMap[action.toLowerCase()] || Activity;
+  };
+
+  const getActivityColor = (action) => {
+    const colorMap = {
+      'login': 'text-green-500',
+      'logout': 'text-gray-500',
+      'create': 'text-blue-500',
+      'update': 'text-blue-500',
+      'delete': 'text-red-500',
+      'register': 'text-green-500',
+      'password_reset': 'text-yellow-500',
+      'mfa_enable': 'text-purple-500',
+      'mfa_disable': 'text-orange-500',
+    };
+    return colorMap[action.toLowerCase()] || 'text-gray-500';
+  };
+
+  const recentActivity = Array.isArray(recentAuditData?.data?.data) 
+    ? recentAuditData.data.data.map((log, index) => ({
+        id: log.id || index,
+        type: log.action,
+        message: `${log.user?.firstName || log.user?.email || 'System'} ${log.action}${log.module ? ` in ${log.module}` : ''}`,
+        time: format(new Date(log.createdAt), 'MMM dd, HH:mm'),
+        icon: getActivityIcon(log.action),
+        color: getActivityColor(log.action),
+      }))
+    : [];
 
   const quickActions = [
     {
@@ -185,12 +246,22 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">{stat.name}</p>
-                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                  <p className={`text-sm ${
-                    stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {stat.change} from last month
-                  </p>
+                  {stat.loading ? (
+                    <div className="animate-pulse">
+                      <div className="h-8 bg-gray-200 rounded w-20 mb-2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-16"></div>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                      <p className={`text-sm ${
+                        stat.changeType === 'positive' ? 'text-green-600' : 
+                        stat.changeType === 'negative' ? 'text-red-600' : 'text-gray-600'
+                      }`}>
+                        {stat.change} from last month
+                      </p>
+                    </>
+                  )}
                 </div>
                 <div className="p-3 bg-blue-100 rounded-full">
                   <Icon className="h-6 w-6 text-blue-600" />
@@ -275,33 +346,65 @@ const Dashboard = () => {
       {/* System Status */}
       <Card>
         <Card.Header>
-          <Card.Title>System Status</Card.Title>
-          <Card.Description>
-            Current system health and performance metrics
-          </Card.Description>
+          <div className="flex items-center justify-between">
+            <div>
+              <Card.Title>System Status</Card.Title>
+              <Card.Description>
+                Current system health and performance metrics
+              </Card.Description>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.location.reload()}
+              icon={<RefreshCw className="h-4 w-4" />}
+            >
+              Refresh
+            </Button>
+          </div>
         </Card.Header>
         <Card.Content>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <CheckCircle className="h-8 w-8 text-green-600" />
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 ${
+                healthLoading ? 'bg-gray-100' : 
+                healthError ? 'bg-yellow-100' :
+                healthData?.data?.status === 'healthy' ? 'bg-green-100' : 'bg-red-100'
+              }`}>
+                {healthLoading ? (
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600"></div>
+                ) : healthError ? (
+                  <AlertTriangle className="h-8 w-8 text-yellow-600" />
+                ) : healthData?.data?.status === 'healthy' ? (
+                  <CheckCircle className="h-8 w-8 text-green-600" />
+                ) : (
+                  <AlertTriangle className="h-8 w-8 text-red-600" />
+                )}
               </div>
               <h3 className="text-lg font-medium text-gray-900">System Health</h3>
-              <p className="text-sm text-gray-500">All systems operational</p>
+              <p className="text-sm text-gray-500">
+                {healthLoading ? 'Checking...' : 
+                 healthError ? 'Health endpoint not available' :
+                 healthData?.data?.status === 'healthy' ? 'All systems operational' : 'Issues detected'}
+              </p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <TrendingUp className="h-8 w-8 text-blue-600" />
               </div>
               <h3 className="text-lg font-medium text-gray-900">Performance</h3>
-              <p className="text-sm text-gray-500">Response time: 45ms</p>
+              <p className="text-sm text-gray-500">
+                Response time: {healthError ? 'N/A' : healthData?.data?.responseTime || 'N/A'}ms
+              </p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <AlertTriangle className="h-8 w-8 text-yellow-600" />
               </div>
               <h3 className="text-lg font-medium text-gray-900">Security</h3>
-              <p className="text-sm text-gray-500">3 active alerts</p>
+              <p className="text-sm text-gray-500">
+                {auditStatsData?.data?.securityAlerts || 0} active alerts
+              </p>
             </div>
           </div>
         </Card.Content>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   FileText, 
   Search, 
@@ -10,7 +10,9 @@ import {
   User,
   Activity,
   Eye,
-  AlertTriangle
+  AlertTriangle,
+  Trash2,
+  Settings
 } from 'lucide-react';
 import { auditAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -37,9 +39,12 @@ const AuditLogs = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showCleanupModal, setShowCleanupModal] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null);
+  const [autoRefresh, setAutoRefresh] = useState(false);
 
   const { hasRole } = useAuth();
+  const queryClient = useQueryClient();
 
   // Check if user has permission to view audit logs
   const canViewAuditLogs = hasRole(['admin', 'auditor']);
@@ -59,6 +64,7 @@ const AuditLogs = () => {
     }),
     enabled: canViewAuditLogs, // Only fetch if user has permission
     keepPreviousData: true,
+    refetchInterval: autoRefresh ? 30000 : false, // Auto-refresh every 30 seconds if enabled
   });
 
   // Fetch available modules (only if user has permission)
@@ -85,11 +91,25 @@ const AuditLogs = () => {
     enabled: canViewAuditLogs, // Only fetch if user has permission
   });
 
-  const auditLogs = auditData?.data || [];
-  const pagination = auditData?.pagination || {};
-  const modules = modulesData?.data || [];
-  const actions = actionsData?.data || [];
+  const auditLogs = Array.isArray(auditData?.data?.data) ? auditData.data.data : Array.isArray(auditData?.data) ? auditData.data : [];
+  const pagination = auditData?.data?.pagination || auditData?.pagination || {};
+  const modules = Array.isArray(modulesData?.data?.data) ? modulesData.data.data : Array.isArray(modulesData?.data) ? modulesData.data : [];
+  const actions = Array.isArray(actionsData?.data?.data) ? actionsData.data.data : Array.isArray(actionsData?.data) ? actionsData.data : [];
   const stats = statsData?.data || {};
+
+  // Audit cleanup mutation
+  const cleanupMutation = useMutation({
+    mutationFn: ({ daysToKeep }) => auditAPI.cleanupOldLogs(daysToKeep),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['audit-logs']);
+      queryClient.invalidateQueries(['audit-stats']);
+      setShowCleanupModal(false);
+      toast.success('Old audit logs cleaned up successfully');
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to cleanup audit logs');
+    },
+  });
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -160,6 +180,15 @@ const AuditLogs = () => {
   const openDetailsModal = (log) => {
     setSelectedLog(log);
     setShowDetailsModal(true);
+  };
+
+  const handleCleanup = (data) => {
+    cleanupMutation.mutate({ daysToKeep: data.daysToKeep });
+  };
+
+  const handleRefresh = () => {
+    queryClient.invalidateQueries(['audit-logs']);
+    queryClient.invalidateQueries(['audit-stats']);
   };
 
   const getActionColor = (action) => {
@@ -285,11 +314,35 @@ const AuditLogs = () => {
         <div className="flex space-x-2">
           <Button
             variant="outline"
+            onClick={() => setAutoRefresh(!autoRefresh)}
+            icon={<Settings className="h-5 w-5" />}
+            className={autoRefresh ? 'bg-blue-50 text-blue-600' : ''}
+          >
+            {autoRefresh ? 'Auto-Refresh On' : 'Auto-Refresh Off'}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleRefresh}
+            icon={<RefreshCw className="h-5 w-5" />}
+          >
+            Refresh
+          </Button>
+          <Button
+            variant="outline"
             onClick={handleExport}
             icon={<Download className="h-5 w-5" />}
           >
             Export
           </Button>
+          {hasRole(['admin']) && (
+            <Button
+              variant="destructive"
+              onClick={() => setShowCleanupModal(true)}
+              icon={<Trash2 className="h-5 w-5" />}
+            >
+              Cleanup
+            </Button>
+          )}
           <Button
             variant="outline"
             onClick={handleResetFilters}
@@ -441,6 +494,19 @@ const AuditLogs = () => {
           <AuditLogDetails log={selectedLog} />
         )}
       </Modal>
+
+      {/* Cleanup Modal */}
+      <Modal
+        isOpen={showCleanupModal}
+        onClose={() => setShowCleanupModal(false)}
+        title="Cleanup Old Audit Logs"
+      >
+        <AuditCleanupForm
+          onSubmit={handleCleanup}
+          onCancel={() => setShowCleanupModal(false)}
+          loading={cleanupMutation.isPending}
+        />
+      </Modal>
     </div>
   );
 };
@@ -499,6 +565,75 @@ const AuditLogDetails = ({ log }) => {
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+// Audit Cleanup Form Component
+const AuditCleanupForm = ({ onSubmit, onCancel, loading }) => {
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    defaultValues: {
+      daysToKeep: 90
+    }
+  });
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-red-50 border border-red-200 rounded-md p-4">
+        <div className="flex">
+          <AlertTriangle className="h-5 w-5 text-red-400 mr-2 mt-0.5" />
+          <div>
+            <h4 className="text-sm font-medium text-red-800">Audit Log Cleanup</h4>
+            <p className="text-sm text-red-700 mt-1">
+              This will permanently remove audit logs older than the specified number of days. 
+              This action cannot be undone.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <Input
+          label="Keep logs for (days)"
+          type="number"
+          min="1"
+          max="365"
+          {...register('daysToKeep', { 
+            required: 'Please specify number of days',
+            min: { value: 1, message: 'Must keep at least 1 day' },
+            max: { value: 365, message: 'Cannot keep more than 365 days' }
+          })}
+          error={errors.daysToKeep?.message}
+          helperText="Audit logs older than this will be permanently deleted"
+        />
+
+        <div className="bg-gray-50 p-3 rounded-md">
+          <h5 className="text-sm font-medium text-gray-900 mb-2">Cleanup Summary</h5>
+          <ul className="text-sm text-gray-600 space-y-1">
+            <li>• Logs older than specified days will be removed</li>
+            <li>• This action cannot be undone</li>
+            <li>• Consider backing up important logs first</li>
+            <li>• Estimated cleanup time: 2-5 minutes</li>
+          </ul>
+        </div>
+
+        <div className="flex justify-end space-x-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="destructive"
+            loading={loading}
+          >
+            Cleanup Logs
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };

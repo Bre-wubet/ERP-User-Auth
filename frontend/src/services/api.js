@@ -21,6 +21,8 @@ api.interceptors.request.use(
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.warn('No access token found for request:', config.url);
     }
     return config;
   },
@@ -39,6 +41,7 @@ api.interceptors.response.use(
 
     // Handle 401 errors (unauthorized)
     if (error.response?.status === 401 && !originalRequest._retry) {
+      console.warn('401 Unauthorized error for:', originalRequest.url, 'Retrying with refresh token...');
       originalRequest._retry = true;
 
       try {
@@ -58,6 +61,7 @@ api.interceptors.response.use(
         }
       } catch (refreshError) {
         // Refresh failed, redirect to login
+        console.error('Token refresh failed:', refreshError);
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
