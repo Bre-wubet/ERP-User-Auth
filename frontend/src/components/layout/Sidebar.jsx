@@ -94,7 +94,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
 
   return (
     <div className={clsx(
-      'bg-gray-900 text-white transition-all duration-300 flex flex-col',
+      'bg-gray-900 text-white transition-all duration-300 flex flex-col sticky top-0 h-screen overflow-y-auto',
       isCollapsed ? 'w-16' : 'w-64'
     )}>
       {/* Header */}
@@ -165,8 +165,8 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
             </NavLink>
           );
         })}
-      </nav>
 
+        
       {/* Footer */}
       <div className="p-4 border-t border-gray-700 space-y-2">
         {/* Notifications */}
@@ -212,6 +212,8 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
           )}
         </button>
       </div>
+      </nav>
+
     </div>
   );
 };

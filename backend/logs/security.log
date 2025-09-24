@@ -104,3 +104,8 @@
 {"timestamp":"2025-09-22T13:21:42.270Z","level":"WARN","message":"Security event: login_failed_invalid_password","event":"login_failed_invalid_password","userId":"cmfrylshw0001vz4w5f6rwf4k","email":"briewubet1192@gmil.com","ip":"::1"}
 {"timestamp":"2025-09-22T14:55:15.211Z","level":"WARN","message":"Security event: login_failed_invalid_password","event":"login_failed_invalid_password","userId":"cmfrx37f00009vzlc9nfkzk7m","email":"brwubet@gmail.com","ip":"::1"}
 {"timestamp":"2025-09-24T03:57:03.126Z","level":"WARN","message":"Security event: login_failed_user_not_found","event":"login_failed_user_not_found","email":"admin@example.com","ip":"::1"}
+{"timestamp":"2025-09-24T08:07:20.520Z","level":"WARN","message":"Security event: login_failed_invalid_password","event":"login_failed_invalid_password","userId":"cmfrwuebu0006vzzcng9ypuv6","email":"admin@erp-system.com","ip":"::1"}
+{"timestamp":"2025-09-24T08:29:19.513Z","level":"WARN","message":"Security event: login_failed_user_not_found","event":"login_failed_user_not_found","email":"briewubet1192@gmail.com","ip":"::1"}
+{"timestamp":"2025-09-24T08:29:42.146Z","level":"WARN","message":"Security event: login_failed_user_not_found","event":"login_failed_user_not_found","email":"briewubet1192@gmail.com","ip":"::1"}
+{"timestamp":"2025-09-24T10:20:20.861Z","level":"WARN","message":"Security event: login_failed_user_not_found","event":"login_failed_user_not_found","email":"briecoder@gmail.com","ip":"::1"}
+{"timestamp":"2025-09-24T10:21:41.086Z","level":"WARN","message":"Security event: login_failed_user_not_found","event":"login_failed_user_not_found","email":"briecoder@gmail.com","ip":"::1"}

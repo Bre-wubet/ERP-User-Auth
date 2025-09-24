@@ -37,6 +37,25 @@ const queryClient = new QueryClient({
   },
 });
 
+// Shared Layout for all protected pages
+function ProtectedLayout({ children, sidebarCollapsed, toggleSidebar }) {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="flex min-h-screen">
+        <Sidebar isCollapsed={sidebarCollapsed} onToggle={toggleSidebar} />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Navbar onMenuToggle={toggleSidebar} />
+          <main className="flex-1 overflow-x-hidden overflow-y-auto">
+            <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
+              {children}
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /**
  * Main App Component
  * Handles routing, authentication, and layout
@@ -86,186 +105,116 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPasswordForm />} />
               <Route path="/reset-password" element={<ResetPasswordForm />} />
               
-                      {/* Protected Routes */}
-                      <Route
-                        path="/dashboard"
-                        element={
-                          <PrivateRoute>
-                            <div className="flex h-screen">
-                              <Sidebar
-                                isCollapsed={sidebarCollapsed}
-                                onToggle={toggleSidebar}
-                              />
-                              <div className="flex-1 flex flex-col overflow-hidden">
-                                <Navbar onMenuToggle={toggleSidebar} />
-                                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
-                                  <Dashboard />
-                                </main>
-                              </div>
-                            </div>
-                          </PrivateRoute>
-                        }
-                      />
+              {/* Protected Routes using shared layout */}
+              <Route
+                path="/dashboard"
+                element={
+                  <PrivateRoute>
+                    <ProtectedLayout sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar}>
+                      <Dashboard />
+                    </ProtectedLayout>
+                  </PrivateRoute>
+                }
+              />
 
-                      <Route
-                        path="/users"
-                        element={
-                          <PrivateRoute>
-                            <div className="flex h-screen">
-                              <Sidebar
-                                isCollapsed={sidebarCollapsed}
-                                onToggle={toggleSidebar}
-                              />
-                              <div className="flex-1 flex flex-col overflow-hidden">
-                                <Navbar onMenuToggle={toggleSidebar} />
-                                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
-                                  <UserManagement />
-                                </main>
-                              </div>
-                            </div>
-                          </PrivateRoute>
-                        }
-                      />
+              <Route
+                path="/users"
+                element={
+                  <PrivateRoute>
+                    <ProtectedLayout sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar}>
+                      <UserManagement />
+                    </ProtectedLayout>
+                  </PrivateRoute>
+                }
+              />
 
-                      <Route
-                        path="/roles"
-                        element={
-                          <PrivateRoute>
-                            <div className="flex h-screen">
-                              <Sidebar
-                                isCollapsed={sidebarCollapsed}
-                                onToggle={toggleSidebar}
-                              />
-                              <div className="flex-1 flex flex-col overflow-hidden">
-                                <Navbar onMenuToggle={toggleSidebar} />
-                                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
-                                  <RoleManagement />
-                                </main>
-                              </div>
-                            </div>
-                          </PrivateRoute>
-                        }
-                      />
+              <Route
+                path="/roles"
+                element={
+                  <PrivateRoute>
+                    <ProtectedLayout sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar}>
+                      <RoleManagement />
+                    </ProtectedLayout>
+                  </PrivateRoute>
+                }
+              />
 
-                      <Route
-                        path="/audit-logs"
-                        element={
-                          <PrivateRoute>
-                            <div className="flex h-screen">
-                              <Sidebar
-                                isCollapsed={sidebarCollapsed}
-                                onToggle={toggleSidebar}
-                              />
-                              <div className="flex-1 flex flex-col overflow-hidden">
-                                <Navbar onMenuToggle={toggleSidebar} />
-                                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
-                                  <AuditLogs />
-                                </main>
-                              </div>
-                            </div>
-                          </PrivateRoute>
-                        }
-                      />
+              <Route
+                path="/audit-logs"
+                element={
+                  <PrivateRoute>
+                    <ProtectedLayout sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar}>
+                      <AuditLogs />
+                    </ProtectedLayout>
+                  </PrivateRoute>
+                }
+              />
 
-                      <Route
-                        path="/profile"
-                        element={
-                          <PrivateRoute>
-                            <div className="flex h-screen">
-                              <Sidebar
-                                isCollapsed={sidebarCollapsed}
-                                onToggle={toggleSidebar}
-                              />
-                              <div className="flex-1 flex flex-col overflow-hidden">
-                                <Navbar onMenuToggle={toggleSidebar} />
-                                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
-                                  <ProfileSettings />
-                                </main>
-                              </div>
-                            </div>
-                          </PrivateRoute>
-                        }
-                      />
+              <Route
+                path="/profile"
+                element={
+                  <PrivateRoute>
+                    <ProtectedLayout sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar}>
+                      <ProfileSettings />
+                    </ProtectedLayout>
+                  </PrivateRoute>
+                }
+              />
 
-                      <Route
-                        path="/session-management"
-                        element={
-                          <PrivateRoute>
-                            <div className="flex h-screen">
-                              <Sidebar
-                                isCollapsed={sidebarCollapsed}
-                                onToggle={toggleSidebar}
-                              />
-                              <div className="flex-1 flex flex-col overflow-hidden">
-                                <Navbar onMenuToggle={toggleSidebar} />
-                                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
-                                  <SessionManagement />
-                                </main>
-                              </div>
-                            </div>
-                          </PrivateRoute>
-                        }
-                      />
+              <Route
+                path="/sessions"
+                element={
+                  <PrivateRoute>
+                    <ProtectedLayout sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar}>
+                      <SessionManagement />
+                    </ProtectedLayout>
+                  </PrivateRoute>
+                }
+              />
 
-                      <Route
-                        path="/system-health"
-                        element={
-                          <PrivateRoute>
-                            <div className="flex h-screen">
-                              <Sidebar
-                                isCollapsed={sidebarCollapsed}
-                                onToggle={toggleSidebar}
-                              />
-                              <div className="flex-1 flex flex-col overflow-hidden">
-                                <Navbar onMenuToggle={toggleSidebar} />
-                                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
-                                  <SystemHealth />
-                                </main>
-                              </div>
-                            </div>
-                          </PrivateRoute>
-                        }
-                      />
+              <Route
+                path="/session-management"
+                element={
+                  <PrivateRoute>
+                    <ProtectedLayout sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar}>
+                      <SessionManagement />
+                    </ProtectedLayout>
+                  </PrivateRoute>
+                }
+              />
 
-                      <Route
-                        path="/admin-tools"
-                        element={
-                          <PrivateRoute>
-                            <div className="flex h-screen">
-                              <Sidebar
-                                isCollapsed={sidebarCollapsed}
-                                onToggle={toggleSidebar}
-                              />
-                              <div className="flex-1 flex flex-col overflow-hidden">
-                                <Navbar onMenuToggle={toggleSidebar} />
-                                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
-                                  <AdminTools />
-                                </main>
-                              </div>
-                            </div>
-                          </PrivateRoute>
-                        }
-                      />
+              <Route
+                path="/system-health"
+                element={
+                  <PrivateRoute>
+                    <ProtectedLayout sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar}>
+                      <SystemHealth />
+                    </ProtectedLayout>
+                  </PrivateRoute>
+                }
+              />
 
-                      <Route
-                        path="/mfa-management"
-                        element={
-                          <PrivateRoute>
-                            <div className="flex h-screen">
-                              <Sidebar
-                                isCollapsed={sidebarCollapsed}
-                                onToggle={toggleSidebar}
-                              />
-                              <div className="flex-1 flex flex-col overflow-hidden">
-                                <Navbar onMenuToggle={toggleSidebar} />
-                                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
-                                  <MFAManagement />
-                                </main>
-                              </div>
-                            </div>
-                          </PrivateRoute>
-                        }
-                      />
+              <Route
+                path="/admin-tools"
+                element={
+                  <PrivateRoute>
+                    <ProtectedLayout sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar}>
+                      <AdminTools />
+                    </ProtectedLayout>
+                  </PrivateRoute>
+                }
+              />
+
+              <Route
+                path="/mfa-management"
+                element={
+                  <PrivateRoute>
+                    <ProtectedLayout sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar}>
+                      <MFAManagement />
+                    </ProtectedLayout>
+                  </PrivateRoute>
+                }
+              />
               
               {/* Default redirect */}
               <Route path="/" element={<Navigate to="/dashboard" replace />} />

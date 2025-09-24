@@ -47,15 +47,22 @@ const ProfileSettings = () => {
     queryFn: authAPI.getProfile,
   });
 
-  // Fetch user sessions
+  // Resolve user object safely from possible nested structures
+  const user = profileData?.data?.data || profileData?.data;
+
+  // Fetch user sessions (use resolved user id)
   const { data: sessionsData } = useQuery({
     queryKey: ['user-sessions'],
-    queryFn: () => userAPI.getUserSessions(profileData?.data?.id),
-    enabled: !!profileData?.data?.id,
+    queryFn: () => userAPI.getUserSessions(user?.id),
+    enabled: !!user?.id,
   });
 
-  const user = profileData?.data;
-  const sessions = sessionsData?.data || [];
+  // Safely extract sessions array
+  const sessions = Array.isArray(sessionsData?.data?.data)
+    ? sessionsData.data.data
+    : Array.isArray(sessionsData?.data)
+    ? sessionsData.data
+    : [];
 
   // Update profile mutation
   const updateProfileMutation = useMutation({
@@ -85,9 +92,10 @@ const ProfileSettings = () => {
   const setupMFAMutation = useMutation({
     mutationFn: authAPI.setupMFA,
     onSuccess: (response) => {
-      const { secret, qrCodeUrl } = response.data;
-      setMfaSecret(secret);
-      setQrCodeUrl(qrCodeUrl);
+      const payload = response?.data?.data || response?.data || {};
+      const { secret, qrCodeUrl } = payload;
+      setMfaSecret(secret || '');
+      setQrCodeUrl(qrCodeUrl || '');
       setShowQRCode(true);
       toast.success('MFA setup initiated');
     },

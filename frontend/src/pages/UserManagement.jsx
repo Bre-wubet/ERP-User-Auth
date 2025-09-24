@@ -48,13 +48,6 @@ const UserManagement = () => {
 
   // Check if user has permission to manage users
   const canManageUsers = hasRole(['admin', 'manager', 'hr']);
-  
-  // Debug permission check
-  console.log('Permission Debug:', {
-    userRole: user?.role?.name,
-    canManageUsers,
-    hasRole: hasRole
-  });
 
   // Fetch users with filters (only if user has permission)
   const { data: usersData, isLoading: usersLoading, error: usersError } = useQuery({
@@ -79,15 +72,6 @@ const UserManagement = () => {
   const users = Array.isArray(usersData?.data?.data) ? usersData.data.data : Array.isArray(usersData?.data) ? usersData.data : [];
   const pagination = usersData?.data?.pagination || usersData?.pagination || {};
   const roles = Array.isArray(rolesData?.data?.data) ? rolesData.data.data : Array.isArray(rolesData?.data) ? rolesData.data : [];
-
-  // Debug logging
-  console.log('UserManagement Debug:', {
-    usersData,
-    users,
-    usersLoading,
-    usersError,
-    canManageUsers
-  });
 
   // Create user mutation
   const createUserMutation = useMutation({
