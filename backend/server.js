@@ -9,7 +9,7 @@ import { db } from './config/db.js';
 
 // Import middleware
 import { errorHandler, notFound, securityErrorHandler, databaseErrorHandler } from './middlewares/errorMiddleware.js';
-import { logger } from './utils/logger.js';
+import logger from './utils/logger.js';
 
 // Import routes
 import authRoutes from './routes/authRoutes.js';

@@ -1,17 +1,12 @@
 import { db } from '../config/db.js';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 /**
  * Role service
  * Handles role-based access control operations
  */
-class RoleService {
-  /**
-   * Get all roles with pagination
-   * @param {Object} options - Query options
-   * @returns {Promise<Object>} Roles and pagination info
-   */
-  async getRoles(options = {}) {
+
+export const getRoles = async (options = {}) => {
     const {
       page = 1,
       limit = 10,
@@ -71,12 +66,7 @@ class RoleService {
     }
   }
 
-  /**
-   * Get role by ID
-   * @param {string} roleId - Role ID
-   * @returns {Promise<Object>} Role data
-   */
-  async getRoleById(roleId) {
+export const getRoleById = async (roleId) => {
     try {
       const role = await db.client.role.findUnique({
         where: { id: roleId },
@@ -111,12 +101,7 @@ class RoleService {
     }
   }
 
-  /**
-   * Get role by name
-   * @param {string} roleName - Role name
-   * @returns {Promise<Object>} Role data
-   */
-  async getRoleByName(roleName) {
+export const getRoleByName = async (roleName) => {
     try {
       const role = await db.client.role.findUnique({
         where: { name: roleName }
@@ -133,12 +118,7 @@ class RoleService {
     }
   }
 
-  /**
-   * Create new role
-   * @param {Object} roleData - Role data
-   * @returns {Promise<Object>} Created role
-   */
-  async createRole(roleData) {
+export const createRole = async (roleData) => {
     const { name, scope } = roleData;
 
     try {
@@ -168,13 +148,7 @@ class RoleService {
     }
   }
 
-  /**
-   * Update role
-   * @param {string} roleId - Role ID
-   * @param {Object} updateData - Update data
-   * @returns {Promise<Object>} Updated role
-   */
-  async updateRole(roleId, updateData) {
+export const updateRole = async (roleId, updateData) => {
     const { name, scope } = updateData;
 
     try {
@@ -221,12 +195,7 @@ class RoleService {
     }
   }
 
-  /**
-   * Delete role
-   * @param {string} roleId - Role ID
-   * @returns {Promise<void>}
-   */
-  async deleteRole(roleId) {
+export const deleteRole = async (roleId) => {
     try {
       const role = await db.client.role.findUnique({
         where: { id: roleId },
@@ -260,13 +229,7 @@ class RoleService {
     }
   }
 
-  /**
-   * Assign role to user
-   * @param {string} userId - User ID
-   * @param {string} roleId - Role ID
-   * @returns {Promise<Object>} Updated user
-   */
-  async assignRoleToUser(userId, roleId) {
+export const assignRoleToUser = async (userId, roleId) => {
     try {
       // Check if user exists
       const user = await db.client.user.findUnique({
@@ -305,13 +268,7 @@ class RoleService {
     }
   }
 
-  /**
-   * Remove role from user (assign default role)
-   * @param {string} userId - User ID
-   * @param {string} defaultRoleId - Default role ID
-   * @returns {Promise<Object>} Updated user
-   */
-  async removeRoleFromUser(userId, defaultRoleId) {
+export const removeRoleFromUser = async (userId, defaultRoleId) => {
     try {
       // Check if user exists
       const user = await db.client.user.findUnique({
@@ -350,11 +307,7 @@ class RoleService {
     }
   }
 
-  /**
-   * Get role statistics
-   * @returns {Promise<Object>} Role statistics
-   */
-  async getRoleStats() {
+export const getRoleStats = async () => {
     try {
       const [totalRoles, rolesByScope, usersByRole] = await Promise.all([
         db.client.role.count(),
@@ -399,13 +352,7 @@ class RoleService {
     }
   }
 
-  /**
-   * Search roles
-   * @param {string} query - Search query
-   * @param {Object} options - Search options
-   * @returns {Promise<Array>} Search results
-   */
-  async searchRoles(query, options = {}) {
+export const searchRoles = async (query, options = {}) => {
     const { limit = 10, scope = null } = options;
 
     try {
@@ -440,11 +387,8 @@ class RoleService {
     }
   }
 
-  /**
-   * Get available scopes
-   * @returns {Promise<Array>} Available scopes
-   */
-  async getAvailableScopes() {
+
+export const getAvailableScopes = async () => {
     try {
       const scopes = await db.client.role.findMany({
         select: { scope: true },
@@ -461,13 +405,7 @@ class RoleService {
     }
   }
 
-  /**
-   * Check if user has specific role
-   * @param {string} userId - User ID
-   * @param {string} roleName - Role name
-   * @returns {Promise<boolean>} True if user has role
-   */
-  async userHasRole(userId, roleName) {
+export const userHasRole = async (userId, roleName) => {
     try {
       const user = await db.client.user.findUnique({
         where: { id: userId },
@@ -485,13 +423,7 @@ class RoleService {
     }
   }
 
-  /**
-   * Check if user has role in specific scope
-   * @param {string} userId - User ID
-   * @param {string} scope - Scope
-   * @returns {Promise<boolean>} True if user has role in scope
-   */
-  async userHasRoleInScope(userId, scope) {
+export const userHasRoleInScope = async (userId, scope) => {
     try {
       const user = await db.client.user.findUnique({
         where: { id: userId },
@@ -508,8 +440,19 @@ class RoleService {
       return false;
     }
   }
-}
-
-// Export singleton instance
-export const roleService = new RoleService();
-export default roleService;
+// Export all functions as named exports
+export default {
+  getRoles,
+  getRoleById,
+  getRoleByName,
+  createRole,
+  updateRole,
+  deleteRole,
+  assignRoleToUser,
+  removeRoleFromUser,
+  getRoleStats,
+  searchRoles,
+  getAvailableScopes,
+  userHasRole,
+  userHasRoleInScope
+};

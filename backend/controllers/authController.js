@@ -1,9 +1,9 @@
 import { body, validationResult } from 'express-validator';
-import { authService } from '../services/authService.js';
-import { userService } from '../services/userService.js';
-import { auditService } from '../services/auditService.js';
+import authService from '../services/authService.js';
+import userService from '../services/userService.js';
+import auditService from '../services/auditService.js';
 import { sendSuccessResponse, sendErrorResponse, asyncHandler } from '../middlewares/errorMiddleware.js';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 /**
  * Authentication controller

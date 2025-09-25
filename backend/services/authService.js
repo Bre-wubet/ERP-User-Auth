@@ -1,21 +1,20 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { db } from '../config/db.js';
-import { jwtUtils } from '../utils/jwtUtils.js';
-import { mfaUtils } from '../utils/mfaUtils.js';
-import { logger } from '../utils/logger.js';
-import { emailService } from './emailService.js';
+import jwtUtils from '../utils/jwtUtils.js';
+import mfaUtils from '../utils/mfaUtils.js';
+import logger from '../utils/logger.js';
+import emailService from './emailService.js';
 
 /**
  * Authentication service
  * Handles user authentication, registration, password management, and MFA
  */
-class AuthService {
-  constructor() {
-    this.saltRounds = 12;
-  }
 
-  async register(userData) {
+// Configuration constants
+const SALT_ROUNDS = 12;
+
+export const register = async (userData) => {
     const { email, password, firstName, lastName, roleId } = userData;
 
     try {
@@ -43,7 +42,7 @@ class AuthService {
       }
 
       // Hash password
-      const hashedPassword = await bcrypt.hash(password, this.saltRounds);
+      const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
       // Create user
       const user = await db.client.user.create({
@@ -78,7 +77,7 @@ class AuthService {
       logger.auth('user_registered', user, { ip: userData.ip });
 
       return {
-        user: this.sanitizeUser(user),
+        user: sanitizeUser(user),
         tokens
       };
     } catch (error) {
@@ -87,7 +86,7 @@ class AuthService {
     }
   }
 
-  async login(credentials) {
+export const login = async (credentials) => {
     const { email, password, mfaToken, ip, userAgent } = credentials;
 
     try {
@@ -139,7 +138,7 @@ class AuthService {
       });
 
       // Create session
-      const session = await this.createSession(user.id, ip, userAgent);
+      const session = await createSession(user.id, ip, userAgent);
 
       // Generate tokens
       const tokens = jwtUtils.generateTokenPair(user);
@@ -148,7 +147,7 @@ class AuthService {
       logger.auth('user_logged_in', user, { ip, userAgent, sessionId: session.id });
 
       return {
-        user: this.sanitizeUser(user),
+        user: sanitizeUser(user),
         tokens,
         sessionId: session.id
       };
@@ -158,7 +157,7 @@ class AuthService {
     }
   }
 
-  async refreshToken(refreshToken) {
+export const refreshToken = async (refreshToken) => {
     try {
       const decoded = jwtUtils.verifyRefreshToken(refreshToken);
       
@@ -187,7 +186,7 @@ class AuthService {
     }
   }
 
-  async logout(userId, sessionId) {
+export const logout = async (userId, sessionId) => {
     try {
       // Delete session
       await db.client.session.delete({
@@ -201,7 +200,7 @@ class AuthService {
     }
   }
 
-  async logoutAll(userId) {
+export const logoutAll = async (userId) => {
     try {
       // Delete all user sessions
       await db.client.session.deleteMany({
@@ -215,7 +214,7 @@ class AuthService {
     }
   }
 
-  async changePassword(userId, currentPassword, newPassword) {
+export const changePassword = async (userId, currentPassword, newPassword) => {
     try {
       const user = await db.client.user.findUnique({
         where: { id: userId }
@@ -232,7 +231,7 @@ class AuthService {
       }
 
       // Hash new password
-      const hashedNewPassword = await bcrypt.hash(newPassword, this.saltRounds);
+      const hashedNewPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
 
       // Update password
       await db.client.user.update({
@@ -241,7 +240,7 @@ class AuthService {
       });
 
       // Logout all sessions for security
-      await this.logoutAll(userId);
+      await logoutAll(userId);
 
       logger.auth('password_changed', user);
     } catch (error) {
@@ -250,7 +249,7 @@ class AuthService {
     }
   }
 
-  async initiatePasswordReset(email) {
+export const initiatePasswordReset = async (email) => {
     try {
       const user = await db.client.user.findUnique({
         where: { email: email.toLowerCase() }
@@ -303,7 +302,7 @@ class AuthService {
     }
   }
 
-  async completePasswordReset(resetToken, newPassword) {
+export const completePasswordReset = async (resetToken, newPassword) => {
     try {
       // Find valid reset token
       const resetTokenRecord = await db.client.passwordResetToken.findUnique({
@@ -328,7 +327,7 @@ class AuthService {
       }
 
       // Hash new password
-      const hashedPassword = await bcrypt.hash(newPassword, this.saltRounds);
+      const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
 
       // Update user password
       await db.client.user.update({
@@ -343,7 +342,7 @@ class AuthService {
       });
 
       // Logout all sessions for security
-      await this.logoutAll(resetTokenRecord.userId);
+      await logoutAll(resetTokenRecord.userId);
 
       // Send security alert email
       try {
@@ -378,7 +377,7 @@ class AuthService {
     }
   }
 
-  async setupMFA(userId) {
+export const setupMFA = async (userId) => {
     try {
       const user = await db.client.user.findUnique({
         where: { id: userId }
@@ -405,7 +404,7 @@ class AuthService {
     }
   }
 
-  async enableMFA(userId, token, secret) {
+export const enableMFA = async (userId, token, secret) => {
     try {
       // Verify token
       const isTokenValid = mfaUtils.verifyToken(token, secret);
@@ -417,7 +416,7 @@ class AuthService {
       // Generate and store hashed backup codes
       const backupCodes = mfaUtils.generateBackupCodes();
       const hashedCodes = await Promise.all(
-        backupCodes.map(async (code) => await bcrypt.hash(code, this.saltRounds))
+        backupCodes.map(async (code) => await bcrypt.hash(code, SALT_ROUNDS))
       );
 
       await db.client.user.update({
@@ -453,7 +452,7 @@ class AuthService {
     }
   }
 
-  async disableMFA(userId, token) {
+export const disableMFA = async (userId, token) => {
     try {
       const user = await db.client.user.findUnique({
         where: { id: userId }
@@ -510,7 +509,7 @@ class AuthService {
   }
 
 
-  async createSession(userId, ip, userAgent) {
+export const createSession = async (userId, ip, userAgent) => {
     try {
       const sessionToken = jwtUtils.generateSecureToken();
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
@@ -533,7 +532,7 @@ class AuthService {
   }
 
 
-  async verifySession(sessionToken) {
+export const verifySession = async (sessionToken) => {
     try {
       const session = await db.client.session.findUnique({
         where: { token: sessionToken },
@@ -560,7 +559,7 @@ class AuthService {
   }
 
 
-  async verifyEmail(verificationToken) {
+export const verifyEmail = async (verificationToken) => {
     try {
       const decoded = jwtUtils.verifyApiToken(verificationToken);
       
@@ -586,7 +585,7 @@ class AuthService {
   }
 
 
-  async resendEmailVerification(userId) {
+export const resendEmailVerification = async (userId) => {
     try {
       const user = await db.client.user.findUnique({
         where: { id: userId }
@@ -626,7 +625,7 @@ class AuthService {
   }
 
 
-  async cleanupExpiredResetTokens() {
+export const cleanupExpiredResetTokens = async () => {
     try {
       const result = await db.client.passwordResetToken.deleteMany({
         where: {
@@ -647,12 +646,27 @@ class AuthService {
   }
 
 
-  sanitizeUser(user) {
+export const sanitizeUser = (user) => {
     const { password, mfaSecret, ...sanitizedUser } = user;
     return sanitizedUser;
   }
-}
-
-// Export singleton instance
-export const authService = new AuthService();
-export default authService;
+// Export all functions as named exports
+export default {
+  register,
+  login,
+  refreshToken,
+  logout,
+  logoutAll,
+  changePassword,
+  initiatePasswordReset,
+  completePasswordReset,
+  setupMFA,
+  enableMFA,
+  disableMFA,
+  createSession,
+  verifySession,
+  verifyEmail,
+  resendEmailVerification,
+  cleanupExpiredResetTokens,
+  sanitizeUser
+};

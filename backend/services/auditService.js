@@ -1,17 +1,12 @@
 import { db } from '../config/db.js';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 /**
  * Audit service
  * Handles audit logging and security tracking
  */
-class AuditService {
-  /**
-   * Create audit log entry
-   * @param {Object} auditData - Audit data
-   * @returns {Promise<Object>} Created audit log
-   */
-  async createAuditLog(auditData) {
+
+export const createAuditLog = async (auditData) => {
     const {
       userId = null,
       module,
@@ -56,12 +51,7 @@ class AuditService {
     }
   }
 
-  /**
-   * Get audit logs with pagination and filtering
-   * @param {Object} options - Query options
-   * @returns {Promise<Object>} Audit logs and pagination info
-   */
-  async getAuditLogs(options = {}) {
+export const getAuditLogs = async (options = {}) => {
     const {
       page = 1,
       limit = 50,
@@ -139,12 +129,7 @@ class AuditService {
     }
   }
 
-  /**
-   * Get audit log by ID
-   * @param {string} auditLogId - Audit log ID
-   * @returns {Promise<Object>} Audit log data
-   */
-  async getAuditLogById(auditLogId) {
+export const getAuditLogById = async (auditLogId) => {
     try {
       const auditLog = await db.client.auditLog.findUnique({
         where: { id: auditLogId },
@@ -171,13 +156,7 @@ class AuditService {
     }
   }
 
-  /**
-   * Get audit logs for a specific user
-   * @param {string} userId - User ID
-   * @param {Object} options - Query options
-   * @returns {Promise<Object>} User audit logs
-   */
-  async getUserAuditLogs(userId, options = {}) {
+export const getUserAuditLogs = async (userId, options = {}) => {
     const {
       page = 1,
       limit = 50,
@@ -243,13 +222,7 @@ class AuditService {
     }
   }
 
-  /**
-   * Get audit logs for a specific module
-   * @param {string} module - Module name
-   * @param {Object} options - Query options
-   * @returns {Promise<Object>} Module audit logs
-   */
-  async getModuleAuditLogs(module, options = {}) {
+export const getModuleAuditLogs = async (module, options = {}) => {
     const {
       page = 1,
       limit = 50,
@@ -309,13 +282,8 @@ class AuditService {
       throw error;
     }
   }
-
-  /**
-   * Get audit statistics
-   * @param {Object} options - Query options
-   * @returns {Promise<Object>} Audit statistics
-   */
-  async getAuditStats(options = {}) {
+  
+export const getAuditStats = async (options = {}) => {
     const {
       startDate = null,
       endDate = null,
@@ -424,13 +392,7 @@ class AuditService {
     }
   }
 
-  /**
-   * Search audit logs
-   * @param {string} query - Search query
-   * @param {Object} options - Search options
-   * @returns {Promise<Array>} Search results
-   */
-  async searchAuditLogs(query, options = {}) {
+export const searchAuditLogs = async (query, options = {}) => {
     const { limit = 50, module = null } = options;
 
     try {
@@ -469,11 +431,7 @@ class AuditService {
     }
   }
 
-  /**
-   * Get available modules
-   * @returns {Promise<Array>} Available modules
-   */
-  async getAvailableModules() {
+export const getAvailableModules = async () => {
     try {
       const modules = await db.client.auditLog.findMany({
         select: { module: true },
@@ -489,11 +447,7 @@ class AuditService {
     }
   }
 
-  /**
-   * Get available actions
-   * @returns {Promise<Array>} Available actions
-   */
-  async getAvailableActions() {
+export const getAvailableActions = async () => {
     try {
       const actions = await db.client.auditLog.findMany({
         select: { action: true },
@@ -509,12 +463,7 @@ class AuditService {
     }
   }
 
-  /**
-   * Clean up old audit logs
-   * @param {number} daysToKeep - Number of days to keep (default: 90)
-   * @returns {Promise<number>} Number of deleted logs
-   */
-  async cleanupOldLogs(daysToKeep = 90) {
+export const cleanupOldLogs = async (daysToKeep = 90) => {
     try {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
@@ -539,14 +488,7 @@ class AuditService {
     }
   }
 
-  /**
-   * Log security event
-   * @param {string} event - Security event type
-   * @param {Object} details - Event details
-   * @param {string} ip - IP address
-   * @returns {Promise<Object>} Created audit log
-   */
-  async logSecurityEvent(event, details, ip = null) {
+export const logSecurityEvent = async (event, details, ip = null) => {
     return this.createAuditLog({
       module: 'security',
       action: event,
@@ -555,15 +497,7 @@ class AuditService {
     });
   }
 
-  /**
-   * Log authentication event
-   * @param {string} event - Authentication event type
-   * @param {string} userId - User ID
-   * @param {Object} details - Event details
-   * @param {string} ip - IP address
-   * @returns {Promise<Object>} Created audit log
-   */
-  async logAuthEvent(event, userId, details, ip = null) {
+export const logAuthEvent = async (event, userId, details, ip = null) => {
     return this.createAuditLog({
       userId,
       module: 'authentication',
@@ -572,8 +506,18 @@ class AuditService {
       ip
     });
   }
-}
-
-// Export singleton instance
-export const auditService = new AuditService();
-export default auditService;
+// Export all functions as named exports
+export default {
+  createAuditLog,
+  getAuditLogs,
+  getAuditLogById,
+  getUserAuditLogs,
+  getModuleAuditLogs,
+  getAuditStats,
+  searchAuditLogs,
+  getAvailableModules,
+  getAvailableActions,
+  cleanupOldLogs,
+  logSecurityEvent,
+  logAuthEvent
+};

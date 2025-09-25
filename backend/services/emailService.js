@@ -1,18 +1,16 @@
 import 'dotenv/config';
 import nodemailer from 'nodemailer';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 /**
  * Email Service
  * Handles all email operations including password reset, notifications, etc.
  */
-class EmailService {
-  constructor() {
-    this.transporter = null;
-    this.initializeTransporter();
-  }
 
-  initializeTransporter() {
+// Initialize transporter
+let transporter = null;
+
+const initializeTransporter = () => {
     try {
       // Create transporter based on environment configuration
       const emailConfig = {
@@ -31,10 +29,10 @@ class EmailService {
 console.log("SMTP_PASS exists:", !!process.env.SMTP_PASS);
 
 
-      this.transporter = nodemailer.createTransport(emailConfig);
+      transporter = nodemailer.createTransport(emailConfig);
 
       // Verify connection configuration
-      this.transporter.verify((error, success) => {
+      transporter.verify((error, success) => {
         if (error) {
           logger.error('Email service initialization failed', { error: error.message });
         } else {
@@ -46,7 +44,7 @@ console.log("SMTP_PASS exists:", !!process.env.SMTP_PASS);
     }
   }
 
-  async sendPasswordResetEmail(email, resetToken, userName) {
+export const sendPasswordResetEmail = async (email, resetToken, userName) => {
     try {
       const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
       
@@ -57,11 +55,11 @@ console.log("SMTP_PASS exists:", !!process.env.SMTP_PASS);
         },
         to: email,
         subject: 'Password Reset Request - ERP Security System',
-        html: this.getPasswordResetTemplate(userName, resetUrl),
-        text: this.getPasswordResetTextTemplate(userName, resetUrl),
+        html: getPasswordResetTemplate(userName, resetUrl),
+        text: getPasswordResetTextTemplate(userName, resetUrl),
       };
 
-      const result = await this.transporter.sendMail(mailOptions);
+      const result = await transporter.sendMail(mailOptions);
       logger.info('Password reset email sent', { 
         email, 
         messageId: result.messageId 
@@ -77,7 +75,7 @@ console.log("SMTP_PASS exists:", !!process.env.SMTP_PASS);
     }
   }
 
-  async sendWelcomeEmail(email, userName, tempPassword = null) {
+export const sendWelcomeEmail = async (email, userName, tempPassword = null) => {
     try {
       const mailOptions = {
         from: {
@@ -86,11 +84,11 @@ console.log("SMTP_PASS exists:", !!process.env.SMTP_PASS);
         },
         to: email,
         subject: 'Welcome to ERP Security System',
-        html: this.getWelcomeTemplate(userName, tempPassword),
-        text: this.getWelcomeTextTemplate(userName, tempPassword),
+        html: getWelcomeTemplate(userName, tempPassword),
+        text: getWelcomeTextTemplate(userName, tempPassword),
       };
 
-      const result = await this.transporter.sendMail(mailOptions);
+      const result = await transporter.sendMail(mailOptions);
       logger.info('Welcome email sent', { 
         email, 
         messageId: result.messageId 
@@ -106,7 +104,7 @@ console.log("SMTP_PASS exists:", !!process.env.SMTP_PASS);
     }
   }
 
-  async sendAccountActivationEmail(email, userName, activationToken) {
+export const sendAccountActivationEmail = async (email, userName, activationToken) => {
     try {
       const activationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/activate-account?token=${activationToken}`;
       
@@ -117,11 +115,11 @@ console.log("SMTP_PASS exists:", !!process.env.SMTP_PASS);
         },
         to: email,
         subject: 'Activate Your Account - ERP Security System',
-        html: this.getAccountActivationTemplate(userName, activationUrl),
-        text: this.getAccountActivationTextTemplate(userName, activationUrl),
+        html: getAccountActivationTemplate(userName, activationUrl),
+        text: getAccountActivationTextTemplate(userName, activationUrl),
       };
 
-      const result = await this.transporter.sendMail(mailOptions);
+      const result = await transporter.sendMail(mailOptions);
       logger.info('Account activation email sent', { 
         email, 
         messageId: result.messageId 
@@ -137,7 +135,7 @@ console.log("SMTP_PASS exists:", !!process.env.SMTP_PASS);
     }
   }
 
-  async sendSecurityAlertEmail(email, userName, alertType, details) {
+export const sendSecurityAlertEmail = async (email, userName, alertType, details) => {
     try {
       const mailOptions = {
         from: {
@@ -146,11 +144,11 @@ console.log("SMTP_PASS exists:", !!process.env.SMTP_PASS);
         },
         to: email,
         subject: `Security Alert: ${alertType} - ERP Security System`,
-        html: this.getSecurityAlertTemplate(userName, alertType, details),
-        text: this.getSecurityAlertTextTemplate(userName, alertType, details),
+        html: getSecurityAlertTemplate(userName, alertType, details),
+        text: getSecurityAlertTextTemplate(userName, alertType, details),
       };
 
-      const result = await this.transporter.sendMail(mailOptions);
+      const result = await transporter.sendMail(mailOptions);
       logger.info('Security alert email sent', { 
         email, 
         alertType,
@@ -168,7 +166,7 @@ console.log("SMTP_PASS exists:", !!process.env.SMTP_PASS);
     }
   }
 
-  async sendMFASetupEmail(email, userName) {
+export const sendMFASetupEmail = async (email, userName) => {
     try {
       const mailOptions = {
         from: {
@@ -177,11 +175,11 @@ console.log("SMTP_PASS exists:", !!process.env.SMTP_PASS);
         },
         to: email,
         subject: 'MFA Setup Complete - ERP Security System',
-        html: this.getMFASetupTemplate(userName),
-        text: this.getMFASetupTextTemplate(userName),
+        html: getMFASetupTemplate(userName),
+        text: getMFASetupTextTemplate(userName),
       };
 
-      const result = await this.transporter.sendMail(mailOptions);
+      const result = await transporter.sendMail(mailOptions);
       logger.info('MFA setup email sent', { 
         email, 
         messageId: result.messageId 
@@ -197,10 +195,10 @@ console.log("SMTP_PASS exists:", !!process.env.SMTP_PASS);
     }
   }
 
-  /**
-   * Get password reset HTML template
-   */
-  getPasswordResetTemplate(userName, resetUrl) {
+/**
+ * Get password reset HTML template
+ */
+export const getPasswordResetTemplate = (userName, resetUrl) => {
     return `
       <!DOCTYPE html>
       <html>
@@ -248,10 +246,10 @@ console.log("SMTP_PASS exists:", !!process.env.SMTP_PASS);
     `;
   }
 
-  /**
-   * Get password reset text template
-   */
-  getPasswordResetTextTemplate(userName, resetUrl) {
+/**
+ * Get password reset text template
+ */
+export const getPasswordResetTextTemplate = (userName, resetUrl) => {
     return `
 Password Reset Request - ERP Security System
 
@@ -274,10 +272,10 @@ ERP Security System Team
     `;
   }
 
-  /**
-   * Get welcome HTML template
-   */
-  getWelcomeTemplate(userName, tempPassword = null) {
+/**
+ * Get welcome HTML template
+ */
+export const getWelcomeTemplate = (userName, tempPassword = null) => {
     const tempPasswordSection = tempPassword ? `
       <div class="warning">
         <strong>Temporary Password:</strong>
@@ -323,10 +321,10 @@ ERP Security System Team
     `;
   }
 
-  /**
-   * Get welcome text template
-   */
-  getWelcomeTextTemplate(userName, tempPassword = null) {
+/**
+ * Get welcome text template
+ */
+export const getWelcomeTextTemplate = (userName, tempPassword = null) => {
     const tempPasswordSection = tempPassword ? `
 Temporary Password: ${tempPassword}
 Please change this password after your first login.
@@ -350,10 +348,10 @@ ERP Security System Team
     `;
   }
 
-  /**
-   * Get account activation HTML template
-   */
-  getAccountActivationTemplate(userName, activationUrl) {
+/**
+ * Get account activation HTML template
+ */
+export const getAccountActivationTemplate = (userName, activationUrl) => {
     return `
       <!DOCTYPE html>
       <html>
@@ -391,10 +389,10 @@ ERP Security System Team
     `;
   }
 
-  /**
-   * Get account activation text template
-   */
-  getAccountActivationTextTemplate(userName, activationUrl) {
+/**
+ * Get account activation text template
+ */
+export const getAccountActivationTextTemplate = (userName, activationUrl) => {
     return `
 Account Activation - ERP Security System
 
@@ -409,10 +407,10 @@ ERP Security System Team
     `;
   }
 
-  /**
-   * Get security alert HTML template
-   */
-  getSecurityAlertTemplate(userName, alertType, details) {
+/**
+ * Get security alert HTML template
+ */
+export const getSecurityAlertTemplate = (userName, alertType, details) => {
     return `
       <!DOCTYPE html>
       <html>
@@ -452,10 +450,10 @@ ERP Security System Team
     `;
   }
 
-  /**
-   * Get security alert text template
-   */
-  getSecurityAlertTextTemplate(userName, alertType, details) {
+/**
+ * Get security alert text template
+ */
+export const getSecurityAlertTextTemplate = (userName, alertType, details) => {
     return `
 Security Alert - ERP Security System
 
@@ -473,10 +471,10 @@ ERP Security System Team
     `;
   }
 
-  /**
-   * Get MFA setup HTML template
-   */
-  getMFASetupTemplate(userName) {
+/**
+ * Get MFA setup HTML template
+ */
+export const getMFASetupTemplate = (userName) => {
     return `
       <!DOCTYPE html>
       <html>
@@ -512,10 +510,10 @@ ERP Security System Team
     `;
   }
 
-  /**
-   * Get MFA setup text template
-   */
-  getMFASetupTextTemplate(userName) {
+/**
+ * Get MFA setup text template
+ */
+export const getMFASetupTextTemplate = (userName) => {
     return `
 MFA Setup Complete - ERP Security System
 
@@ -531,8 +529,24 @@ Best regards,
 ERP Security System Team
     `;
   }
-}
+// Initialize the transporter
+initializeTransporter();
 
-// Export singleton instance
-export const emailService = new EmailService();
-export default emailService;
+// Export all functions as named exports
+export default {
+  sendPasswordResetEmail,
+  sendWelcomeEmail,
+  sendAccountActivationEmail,
+  sendSecurityAlertEmail,
+  sendMFASetupEmail,
+  getPasswordResetTemplate,
+  getPasswordResetTextTemplate,
+  getWelcomeTemplate,
+  getWelcomeTextTemplate,
+  getAccountActivationTemplate,
+  getAccountActivationTextTemplate,
+  getSecurityAlertTemplate,
+  getSecurityAlertTextTemplate,
+  getMFASetupTemplate,
+  getMFASetupTextTemplate
+};

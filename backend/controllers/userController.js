@@ -1,8 +1,8 @@
 import { body, query, validationResult } from 'express-validator';
-import { userService } from '../services/userService.js';
-import { auditService } from '../services/auditService.js';
+import userService from '../services/userService.js';
+import auditService from '../services/auditService.js';
 import { sendSuccessResponse, sendErrorResponse, sendPaginatedResponse, asyncHandler } from '../middlewares/errorMiddleware.js';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 /**
  * User management controller

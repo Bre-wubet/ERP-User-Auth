@@ -1,6 +1,6 @@
-import { jwtUtils } from '../utils/jwtUtils.js';
-import { authService } from '../services/authService.js';
-import { logger } from '../utils/logger.js';
+import jwtUtils from '../utils/jwtUtils.js';
+import authService from '../services/authService.js';
+import logger from '../utils/logger.js';
 
 /**
  * Authentication middleware

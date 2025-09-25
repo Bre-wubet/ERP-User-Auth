@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
-import { emailService } from './services/emailService.js';
+import emailService from './services/emailService.js';
 
 /**
  * Test script for email service

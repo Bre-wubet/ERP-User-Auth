@@ -1,5 +1,5 @@
-import { roleService } from '../services/roleService.js';
-import { logger } from '../utils/logger.js';
+import roleService from '../services/roleService.js';
+import logger from '../utils/logger.js';
 
 /**
  * Role-based access control middleware

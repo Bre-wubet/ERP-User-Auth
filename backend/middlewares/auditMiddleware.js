@@ -1,17 +1,11 @@
-import { auditService } from '../services/auditService.js';
-import { logger } from '../utils/logger.js';
+import auditService from '../services/auditService.js';
+import logger from '../utils/logger.js';
 
 /**
  * Audit middleware
  * Handles automatic audit logging for API requests
  */
 
-/**
- * Audit middleware for logging API requests
- * @param {string} module - Module name for audit logs
- * @param {string} action - Action name (optional, will be inferred from HTTP method)
- * @returns {Function} Middleware function
- */
 export const auditLog = (module, action = null) => {
   return async (req, res, next) => {
     const startTime = Date.now();
@@ -35,15 +29,6 @@ export const auditLog = (module, action = null) => {
   };
 };
 
-/**
- * Log audit entry
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {number} startTime - Request start time
- * @param {any} responseData - Response data
- * @param {string} module - Module name
- * @param {string} action - Action name
- */
 async function logAuditEntry(req, res, startTime, responseData, module, action) {
   try {
     const endTime = Date.now();
@@ -85,11 +70,6 @@ async function logAuditEntry(req, res, startTime, responseData, module, action) 
   }
 }
 
-/**
- * Get action from HTTP method
- * @param {string} method - HTTP method
- * @returns {string} Action name
- */
 function getActionFromMethod(method) {
   const methodActions = {
     'GET': 'read',
@@ -102,12 +82,6 @@ function getActionFromMethod(method) {
   return methodActions[method.toUpperCase()] || 'unknown';
 }
 
-/**
- * Determine if request should be logged
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @returns {boolean} True if should log
- */
 function shouldLogRequest(req, res) {
   // Don't log successful GET requests for non-sensitive endpoints
   if (req.method === 'GET' && res.statusCode < 400) {
@@ -137,11 +111,6 @@ function shouldLogRequest(req, res) {
   return false;
 }
 
-/**
- * Sanitize request body for audit logging
- * @param {Object} body - Request body
- * @returns {Object} Sanitized body
- */
 function sanitizeRequestBody(body) {
   if (!body || typeof body !== 'object') {
     return body;
@@ -160,11 +129,6 @@ function sanitizeRequestBody(body) {
   return sanitized;
 }
 
-/**
- * Sanitize response data for audit logging
- * @param {any} data - Response data
- * @returns {any} Sanitized data
- */
 function sanitizeResponseData(data) {
   if (!data || typeof data !== 'object') {
     return data;
@@ -182,12 +146,6 @@ function sanitizeResponseData(data) {
   return sanitizeRequestBody(data);
 }
 
-/**
- * Audit middleware for sensitive operations
- * @param {string} module - Module name
- * @param {string} action - Action name
- * @returns {Function} Middleware function
- */
 export const auditSensitive = (module, action) => {
   return async (req, res, next) => {
     const startTime = Date.now();
@@ -211,15 +169,6 @@ export const auditSensitive = (module, action) => {
   };
 };
 
-/**
- * Log sensitive audit entry
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {number} startTime - Request start time
- * @param {any} responseData - Response data
- * @param {string} module - Module name
- * @param {string} action - Action name
- */
 async function logSensitiveAuditEntry(req, res, startTime, responseData, module, action) {
   try {
     const endTime = Date.now();
@@ -260,11 +209,6 @@ async function logSensitiveAuditEntry(req, res, startTime, responseData, module,
   }
 }
 
-/**
- * Audit middleware for authentication events
- * @param {string} action - Authentication action
- * @returns {Function} Middleware function
- */
 export const auditAuth = (action) => {
   return async (req, res, next) => {
     const startTime = Date.now();
@@ -288,14 +232,6 @@ export const auditAuth = (action) => {
   };
 };
 
-/**
- * Log authentication audit entry
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {number} startTime - Request start time
- * @param {any} responseData - Response data
- * @param {string} action - Authentication action
- */
 async function logAuthAuditEntry(req, res, startTime, responseData, action) {
   try {
     const endTime = Date.now();
@@ -326,11 +262,6 @@ async function logAuthAuditEntry(req, res, startTime, responseData, action) {
   }
 }
 
-/**
- * Audit middleware for user management operations
- * @param {string} action - User management action
- * @returns {Function} Middleware function
- */
 export const auditUserManagement = (action) => {
   return async (req, res, next) => {
     const startTime = Date.now();
@@ -354,14 +285,6 @@ export const auditUserManagement = (action) => {
   };
 };
 
-/**
- * Log user management audit entry
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {number} startTime - Request start time
- * @param {any} responseData - Response data
- * @param {string} action - User management action
- */
 async function logUserManagementAuditEntry(req, res, startTime, responseData, action) {
   try {
     const endTime = Date.now();

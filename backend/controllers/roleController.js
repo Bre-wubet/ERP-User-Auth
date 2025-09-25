@@ -1,8 +1,8 @@
 import { body, query, validationResult } from 'express-validator';
-import { roleService } from '../services/roleService.js';
-import { auditService } from '../services/auditService.js';
+import roleService from '../services/roleService.js';
+import auditService from '../services/auditService.js';
 import { sendSuccessResponse, sendErrorResponse, sendPaginatedResponse, asyncHandler } from '../middlewares/errorMiddleware.js';
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 export const getRoles = asyncHandler(async (req, res) => {
   const errors = validationResult(req);

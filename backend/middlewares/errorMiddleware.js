@@ -1,17 +1,10 @@
-import { logger } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 
 /**
  * Error handling middleware
  * Provides centralized error handling and logging
  */
 
-/**
- * Global error handler middleware
- * @param {Error} err - Error object
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Next middleware function
- */
 export const errorHandler = (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
@@ -89,12 +82,6 @@ export const errorHandler = (err, req, res, next) => {
   });
 };
 
-/**
- * 404 handler middleware
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Next middleware function
- */
 export const notFound = (req, res, next) => {
   const error = new Error(`Not Found - ${req.originalUrl}`);
   error.statusCode = 404;
@@ -110,24 +97,12 @@ export const notFound = (req, res, next) => {
   next(error);
 };
 
-/**
- * Async error handler wrapper
- * Wraps async route handlers to catch errors
- * @param {Function} fn - Async function to wrap
- * @returns {Function} Wrapped function
- */
 export const asyncHandler = (fn) => {
   return (req, res, next) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 };
 
-/**
- * Validation error handler
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Next middleware function
- */
 export const validationErrorHandler = (req, res, next) => {
   const errors = req.validationErrors?.() || [];
   
@@ -156,13 +131,6 @@ export const validationErrorHandler = (req, res, next) => {
   next();
 };
 
-/**
- * Security error handler
- * @param {Error} err - Error object
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Next middleware function
- */
 export const securityErrorHandler = (err, req, res, next) => {
   // Log security-related errors
   if (err.statusCode === 401 || err.statusCode === 403) {
@@ -180,13 +148,6 @@ export const securityErrorHandler = (err, req, res, next) => {
   next(err);
 };
 
-/**
- * Database error handler
- * @param {Error} err - Error object
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Next middleware function
- */
 export const databaseErrorHandler = (err, req, res, next) => {
   // Handle database connection errors
   if (err.code === 'ECONNREFUSED' || err.code === 'ENOTFOUND') {
@@ -221,9 +182,6 @@ export const databaseErrorHandler = (err, req, res, next) => {
   next(err);
 };
 
-/**
- * Custom error class
- */
 export class AppError extends Error {
   constructor(message, statusCode) {
     super(message);
@@ -234,23 +192,11 @@ export class AppError extends Error {
   }
 }
 
-/**
- * Create custom error
- * @param {string} message - Error message
- * @param {number} statusCode - HTTP status code
- * @returns {AppError} Custom error instance
- */
+
 export const createError = (message, statusCode = 500) => {
   return new AppError(message, statusCode);
 };
 
-/**
- * Handle specific error types
- * @param {string} type - Error type
- * @param {string} message - Error message
- * @param {number} statusCode - HTTP status code
- * @returns {Function} Error handler function
- */
 export const handleError = (type, message, statusCode = 500) => {
   return (req, res, next) => {
     const error = new AppError(message, statusCode);
@@ -259,13 +205,6 @@ export const handleError = (type, message, statusCode = 500) => {
   };
 };
 
-/**
- * Error response formatter
- * @param {Object} res - Express response object
- * @param {string} message - Error message
- * @param {number} statusCode - HTTP status code
- * @param {Object} details - Additional error details
- */
 export const sendErrorResponse = (res, message, statusCode = 500, details = {}) => {
   logger.error('Error response sent', {
     message,
@@ -280,13 +219,6 @@ export const sendErrorResponse = (res, message, statusCode = 500, details = {}) 
   });
 };
 
-/**
- * Success response formatter
- * @param {Object} res - Express response object
- * @param {string} message - Success message
- * @param {any} data - Response data
- * @param {number} statusCode - HTTP status code
- */
 export const sendSuccessResponse = (res, message, data = null, statusCode = 200) => {
   const response = {
     success: true,
@@ -300,13 +232,6 @@ export const sendSuccessResponse = (res, message, data = null, statusCode = 200)
   res.status(statusCode).json(response);
 };
 
-/**
- * Pagination response formatter
- * @param {Object} res - Express response object
- * @param {Array} data - Response data
- * @param {Object} pagination - Pagination info
- * @param {string} message - Success message
- */
 export const sendPaginatedResponse = (res, data, pagination, message = 'Success') => {
   res.status(200).json({
     success: true,
