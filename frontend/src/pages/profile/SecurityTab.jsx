@@ -5,7 +5,7 @@ import Card from '../../components/ui/Card';
 import Input from '../../components/ui/Input';
 import Modal from '../../components/ui/Modal';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const ChangePasswordForm = ({ onSubmit, onCancel, loading }) => {
   const { register, handleSubmit, formState: { errors }, watch } = useForm();
@@ -42,21 +42,10 @@ const ChangePasswordForm = ({ onSubmit, onCancel, loading }) => {
 const SecurityTab = ({
   user,
   onChangePassword,
-  onSetupMFA,
-  onEnableMFA,
-  onDisableMFA,
-  changePasswordLoading,
-  setupMFALoading,
-  enableMFALoading,
-  disableMFALoading,
-  mfaSecret,
-  qrCodeUrl,
-  showQRCode,
-  setShowQRCode,
-  showMFAModal,
-  setShowMFAModal
+  changePasswordLoading
 }) => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="space-y-6">
@@ -92,12 +81,16 @@ const SecurityTab = ({
           <div className="flex space-x-2">
             {user?.mfaSecret ? (
               <>
-                <Button variant="destructive" onClick={onDisableMFA} loading={disableMFALoading}>Disable MFA</Button>
+                <Button variant="outline" onClick={() => navigate('/mfa-management')}>
+                  Manage MFA
+                </Button>
                 <Link to="/mfa" className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-50">Open MFA Screen</Link>
               </>
             ) : (
               <>
-                <Button onClick={() => { onSetupMFA(); setShowMFAModal(true); }} loading={setupMFALoading}>Setup MFA</Button>
+                <Button onClick={() => navigate('/mfa-management')}>
+                  Setup MFA
+                </Button>
                 <Link to="/mfa" className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-50">I already have MFA</Link>
               </>
             )}

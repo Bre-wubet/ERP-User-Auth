@@ -489,7 +489,7 @@ export const cleanupOldLogs = async (daysToKeep = 90) => {
   }
 
 export const logSecurityEvent = async (event, details, ip = null) => {
-    return this.createAuditLog({
+    return createAuditLog({
       module: 'security',
       action: event,
       details,
@@ -498,7 +498,7 @@ export const logSecurityEvent = async (event, details, ip = null) => {
   }
 
 export const logAuthEvent = async (event, userId, details, ip = null) => {
-    return this.createAuditLog({
+    return createAuditLog({
       userId,
       module: 'authentication',
       action: event,

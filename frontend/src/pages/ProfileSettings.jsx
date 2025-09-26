@@ -7,14 +7,7 @@ import {
   Key, 
   Smartphone,
   Eye,
-  EyeOff,
-  Save,
-  Check,
-  X,
-  AlertTriangle,
-  Mail,
-  CheckCircle,
-  XCircle
+  EyeOff
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { authAPI, userAPI } from '../services/api';
@@ -34,10 +27,6 @@ import QRCode from 'qrcode';
 const ProfileSettings = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [showMFAModal, setShowMFAModal] = useState(false);
-  const [showQRCode, setShowQRCode] = useState(false);
-  const [mfaSecret, setMfaSecret] = useState('');
-  const [qrCodeUrl, setQrCodeUrl] = useState('');
 
   const queryClient = useQueryClient();
 
@@ -88,54 +77,6 @@ const ProfileSettings = () => {
     },
   });
 
-  // Setup MFA mutation
-  const setupMFAMutation = useMutation({
-    mutationFn: authAPI.setupMFA,
-    onSuccess: (response) => {
-      const payload = response?.data?.data || response?.data || {};
-      const { secret, qrCodeUrl } = payload;
-      setMfaSecret(secret || '');
-      setQrCodeUrl(qrCodeUrl || '');
-      setShowQRCode(true);
-      toast.success('MFA setup initiated');
-    },
-    onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to setup MFA');
-    },
-  });
-
-  // Enable MFA mutation
-  const [backupCodes, setBackupCodes] = useState([]);
-  const enableMFAMutation = useMutation({
-    mutationFn: authAPI.enableMFA,
-    onSuccess: (res) => {
-      queryClient.invalidateQueries(['user-profile']);
-      setShowMFAModal(false);
-      setShowQRCode(false);
-      const codes = res?.data?.data?.backupCodes || [];
-      if (codes.length) {
-        setBackupCodes(codes);
-        toast.success('MFA enabled. Save your backup codes.');
-      } else {
-        toast.success('MFA enabled successfully');
-      }
-    },
-    onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to enable MFA');
-    },
-  });
-
-  // Disable MFA mutation
-  const disableMFAMutation = useMutation({
-    mutationFn: authAPI.disableMFA,
-    onSuccess: () => {
-      queryClient.invalidateQueries(['user-profile']);
-      toast.success('MFA disabled successfully');
-    },
-    onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to disable MFA');
-    },
-  });
 
   // Resend email verification mutation
   const resendVerificationMutation = useMutation({
@@ -180,20 +121,6 @@ const ProfileSettings = () => {
     changePasswordMutation.mutate(data);
   };
 
-  const handleSetupMFA = () => {
-    setupMFAMutation.mutate();
-  };
-
-  const handleEnableMFA = (data) => {
-    // Ensure we send both token and the secret returned from setup
-    enableMFAMutation.mutate({ token: data.token, secret: mfaSecret });
-  };
-
-  const handleDisableMFA = () => {
-    if (window.confirm('Are you sure you want to disable MFA? This will reduce your account security.')) {
-      disableMFAMutation.mutate({ token: '' });
-    }
-  };
 
   const handleResendVerification = () => {
     resendVerificationMutation.mutate();
@@ -260,19 +187,7 @@ const ProfileSettings = () => {
         <SecurityTab 
           user={user}
           onChangePassword={handleChangePassword}
-          onSetupMFA={handleSetupMFA}
-          onEnableMFA={handleEnableMFA}
-          onDisableMFA={handleDisableMFA}
           changePasswordLoading={changePasswordMutation.isPending}
-          setupMFALoading={setupMFAMutation.isPending}
-          enableMFALoading={enableMFAMutation.isPending}
-          disableMFALoading={disableMFAMutation.isPending}
-          mfaSecret={mfaSecret}
-          qrCodeUrl={qrCodeUrl}
-          showQRCode={showQRCode}
-          setShowQRCode={setShowQRCode}
-          showMFAModal={showMFAModal}
-          setShowMFAModal={setShowMFAModal}
         />
       )}
 
@@ -283,28 +198,6 @@ const ProfileSettings = () => {
 
       
 
-      {/* Backup Codes Modal */}
-      <Modal
-        isOpen={backupCodes.length > 0}
-        onClose={() => setBackupCodes([])}
-        title="Your MFA Backup Codes"
-      >
-        <div className="space-y-3">
-          <p className="text-sm text-gray-600">
-            Store these codes in a safe place. Each code can be used once if you lose access to your authenticator app.
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {backupCodes.map((code) => (
-              <div key={code} className="font-mono text-sm p-2 bg-gray-50 border rounded text-gray-900">
-                {code}
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-end">
-            <Button onClick={() => setBackupCodes([])}>I have saved these</Button>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 };
@@ -386,68 +279,5 @@ const ChangePasswordForm = ({ onSubmit, onCancel, loading }) => {
   );
 };
 
-// MFA Setup Form Component
-const MFASetupForm = ({ mfaSecret, qrCodeUrl, showQRCode, onSubmit, onCancel, loading }) => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
-
-  return (
-    <div className="space-y-4">
-      {showQRCode ? (
-        <div className="text-center">
-          <h4 className="text-lg font-medium text-gray-900 mb-4">Scan QR Code</h4>
-          <p className="text-sm text-gray-600 mb-4">
-            Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
-          </p>
-          
-          {qrCodeUrl && (
-            <div className="flex justify-center mb-4">
-              <img src={qrCodeUrl} alt="MFA QR Code" className="border border-gray-200 rounded" />
-            </div>
-          )}
-
-          <div className="bg-gray-50 p-3 rounded-md mb-4">
-            <p className="text-sm text-gray-600 mb-2">Manual Entry Key:</p>
-            <p className="text-sm font-mono text-gray-900">{mfaSecret}</p>
-          </div>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <Input
-              label="Enter 6-digit code from your app"
-              placeholder="123456"
-              {...register('token', { 
-                required: 'Verification code is required',
-                pattern: {
-                  value: /^\d{6}$/,
-                  message: 'Code must be 6 digits'
-                }
-              })}
-              error={errors.token?.message}
-            />
-
-            <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={onCancel}>
-                Cancel
-              </Button>
-              <Button type="submit" loading={loading}>
-                Enable MFA
-              </Button>
-            </div>
-          </form>
-        </div>
-      ) : (
-        <div className="text-center">
-          <Smartphone className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-          <h4 className="text-lg font-medium text-gray-900 mb-2">Setup Two-Factor Authentication</h4>
-          <p className="text-sm text-gray-600 mb-4">
-            Two-factor authentication adds an extra layer of security to your account.
-          </p>
-          <Button onClick={onSubmit} loading={loading}>
-            Start Setup
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-};
 
 export default ProfileSettings;

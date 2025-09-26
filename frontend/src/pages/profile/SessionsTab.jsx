@@ -25,7 +25,17 @@ const SessionsTab = ({ userId }) => {
     onSuccess: () => queryClient.invalidateQueries(['user-sessions', userId])
   });
 
-  const sessions = data?.data || [];
+  // Ensure sessions is always an array
+  const sessions = Array.isArray(data?.data) ? data.data : 
+                  Array.isArray(data) ? data : 
+                  Array.isArray(data?.sessions) ? data.sessions : 
+                  [];
+
+  // Debug logging (remove in production)
+  if (process.env.NODE_ENV === 'development' && data) {
+    console.log('SessionsTab data:', data);
+    console.log('SessionsTab sessions:', sessions);
+  }
 
   return (
     <Card>

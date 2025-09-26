@@ -13,15 +13,22 @@ import {
   UserPlus,
   UserMinus,
   AlertTriangle,
-  Activity
+  Activity,
+  Settings,
+  Eye,
+  BarChart3,
+  UserCheck,
+  MoreHorizontal
 } from 'lucide-react';
-import { roleAPI, userAPI } from '../services/api';
+import { roleAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Card from '../components/ui/Card';
 import Modal from '../components/ui/Modal';
 import Table from '../components/ui/Table';
+import RoleAssignmentModal from '../components/roles/RoleAssignmentModal';
+import ScopesModal from '../components/roles/ScopesModal';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 
@@ -58,12 +65,6 @@ const RoleManagement = () => {
     keepPreviousData: true,
   });
 
-  // Fetch users for assignment (only if user has permission)
-  const { data: usersData } = useQuery({
-    queryKey: ['users-for-assignment'],
-    queryFn: () => userAPI.getUsers({ limit: 100 }),
-    enabled: canManageRoles, // Only fetch if user has permission
-  });
 
   // Fetch role statistics (only if user has permission)
   const { data: roleStatsData } = useQuery({
@@ -72,12 +73,6 @@ const RoleManagement = () => {
     enabled: canManageRoles,
   });
 
-  // Fetch available scopes (only if user has permission)
-  const { data: scopesData } = useQuery({
-    queryKey: ['available-scopes'],
-    queryFn: roleAPI.getAvailableScopes,
-    enabled: canManageRoles,
-  });
 
   // Extract roles from the nested data structure
   const roles = Array.isArray(rolesData?.data?.data) 
@@ -94,9 +89,7 @@ const RoleManagement = () => {
     ? rolesData.roles 
     : [];
   const pagination = rolesData?.data?.pagination || {};
-  const users = Array.isArray(usersData?.data) ? usersData.data : [];
   const roleStats = roleStatsData?.data || {};
-  const availableScopes = Array.isArray(scopesData?.data) ? scopesData.data : [];
 
   // Create role mutation
   const createRoleMutation = useMutation({
@@ -137,20 +130,6 @@ const RoleManagement = () => {
     },
   });
 
-  // Assign role mutation
-  const assignRoleMutation = useMutation({
-    mutationFn: ({ userId, roleId }) => roleAPI.assignRoleToUser(userId, roleId),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['roles']);
-      queryClient.invalidateQueries(['users']);
-      setShowAssignModal(false);
-      setSelectedRole(null);
-      toast.success('Role assigned successfully');
-    },
-    onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to assign role');
-    },
-  });
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -171,9 +150,6 @@ const RoleManagement = () => {
     }
   };
 
-  const handleAssignRole = (data) => {
-    assignRoleMutation.mutate({ userId: data.userId, roleId: selectedRole.id });
-  };
 
   const openEditModal = (role) => {
     setSelectedRole(role);
@@ -263,57 +239,56 @@ const RoleManagement = () => {
       key: 'actions',
       label: 'Actions',
       render: (role) => (
-        <div className="flex space-x-1">
-          <Button
-            size="sm"
-            variant="outline"
+        <div className="flex items-center space-x-1">
+          {/* Edit Role */}
+          <button
             onClick={() => openEditModal(role)}
-            icon={<Edit className="h-4 w-4" />}
+            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
             title="Edit Role"
           >
-            Edit
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
+            <Edit className="h-4 w-4" />
+          </button>
+          
+          {/* View Statistics */}
+          <button
             onClick={() => openRoleStatsModal(role)}
-            icon={<Activity className="h-4 w-4" />}
+            className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200"
             title="View Statistics"
           >
-            Stats
-          </Button>
+            <Activity className="h-4 w-4" />
+          </button>
+          
+          {/* View Users (only if role has users) */}
           {role._count?.users > 0 && (
-            <Button
-              size="sm"
-              variant="outline"
+            <button
               onClick={() => {
                 // TODO: Implement view users functionality
                 toast.info(`Viewing users for ${role.name} role`);
               }}
-              icon={<Users className="h-4 w-4" />}
-              title="View Users"
+              className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors duration-200"
+              title={`View Users (${role._count.users})`}
             >
-              Users
-            </Button>
+              <Users className="h-4 w-4" />
+            </button>
           )}
-          <Button
-            size="sm"
-            variant="primary"
+          
+          {/* Assign Role */}
+          <button
             onClick={() => openAssignModal(role)}
-            icon={<UserPlus className="h-4 w-4" />}
-            title="Assign to User"
+            className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
+            title="Assign Role to User"
           >
-            Assign
-          </Button>
-          <Button
-            size="sm"
-            variant="destructive"
+            <UserPlus className="h-4 w-4" />
+          </button>
+          
+          {/* Delete Role */}
+          <button
             onClick={() => handleDeleteRole(role.id)}
-            icon={<Trash2 className="h-4 w-4" />}
+            className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
             title="Delete Role"
           >
-            Delete
-          </Button>
+            <Trash2 className="h-4 w-4" />
+          </button>
         </div>
       ),
     },
@@ -528,27 +503,18 @@ const RoleManagement = () => {
       </Modal>
 
       {/* Assign Role Modal */}
-      <Modal
+      <RoleAssignmentModal
         isOpen={showAssignModal}
         onClose={() => {
           setShowAssignModal(false);
           setSelectedRole(null);
         }}
-        title={`Assign Role: ${selectedRole?.name}`}
-      >
-        {selectedRole && (
-          <AssignRoleForm
-            role={selectedRole}
-            users={users}
-            onSubmit={handleAssignRole}
-            onCancel={() => {
-              setShowAssignModal(false);
-              setSelectedRole(null);
-            }}
-            loading={assignRoleMutation.isPending}
-          />
-        )}
-      </Modal>
+        selectedRole={selectedRole}
+        onSuccess={() => {
+          // Additional success handling if needed
+          console.log('Role assigned successfully');
+        }}
+      />
 
       {/* Role Statistics Modal */}
       <Modal
@@ -566,14 +532,10 @@ const RoleManagement = () => {
       </Modal>
 
       {/* Available Scopes Modal */}
-      <Modal
+      <ScopesModal
         isOpen={showScopesModal}
         onClose={() => setShowScopesModal(false)}
-        title="Available Scopes"
-        size="lg"
-      >
-        <ScopesDisplay scopes={availableScopes} />
-      </Modal>
+      />
     </div>
   );
 };
@@ -653,62 +615,6 @@ const EditRoleForm = ({ role, onSubmit, onCancel, loading }) => {
   );
 };
 
-// Assign Role Form Component
-const AssignRoleForm = ({ role, users, onSubmit, onCancel, loading }) => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
-
-  // Filter users who don't already have this role
-  const availableUsers = users.filter(user => user.roleId !== role.id);
-
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-        <p className="text-sm text-blue-800">
-          <strong>Role:</strong> {role.name}
-          {role.scope && <span> ({role.scope})</span>}
-        </p>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Select User
-        </label>
-        <select
-          {...register('userId', { required: 'Please select a user' })}
-          className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value="">Choose a user...</option>
-          {availableUsers.map((user) => (
-            <option key={user.id} value={user.id}>
-              {user.firstName} {user.lastName} ({user.email})
-            </option>
-          ))}
-        </select>
-        {errors.userId && (
-          <p className="text-sm text-red-600 mt-1">{errors.userId.message}</p>
-        )}
-        {availableUsers.length === 0 && (
-          <p className="text-sm text-gray-500 mt-1">
-            All users already have this role assigned.
-          </p>
-        )}
-      </div>
-
-      <div className="flex justify-end space-x-2">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button 
-          type="submit" 
-          loading={loading}
-          disabled={availableUsers.length === 0}
-        >
-          Assign Role
-        </Button>
-      </div>
-    </form>
-  );
-};
 
 // Role Statistics Display Component
 const RoleStatsDisplay = ({ role }) => {
@@ -775,64 +681,5 @@ const RoleStatsDisplay = ({ role }) => {
   );
 };
 
-// Scopes Display Component
-const ScopesDisplay = ({ scopes }) => {
-  return (
-    <div className="space-y-4">
-      <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-        <div className="flex">
-          <Shield className="h-5 w-5 text-blue-400 mr-2 mt-0.5" />
-          <div>
-            <h4 className="text-sm font-medium text-blue-800">About Scopes</h4>
-            <p className="text-sm text-blue-700 mt-1">
-              Scopes allow you to limit role access to specific modules or areas of the system. 
-              Users with scoped roles can only access features within their assigned scope.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <h4 className="font-medium text-gray-900">Available Scopes</h4>
-        {scopes.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            No scopes available
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {scopes.map((scope, index) => (
-              <div key={index} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center">
-                  <Shield className="h-5 w-5 text-blue-500 mr-3" />
-                  <div>
-                    <div className="font-medium text-gray-900">{scope}</div>
-                    <div className="text-sm text-gray-600">
-                      {scope === 'admin' && 'Full system access'}
-                      {scope === 'management' && 'Management module access'}
-                      {scope === 'hr' && 'Human resources module access'}
-                      {scope === 'finance' && 'Finance module access'}
-                      {scope === 'audit' && 'Audit and compliance access'}
-                      {scope === 'user' && 'Basic user access'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h5 className="text-sm font-medium text-gray-900 mb-2">Scope Usage Guidelines</h5>
-        <ul className="text-sm text-gray-600 space-y-1">
-          <li>• Use scopes to limit access to specific modules</li>
-          <li>• Global roles have access to all modules</li>
-          <li>• Scoped roles are more secure for limited access</li>
-          <li>• Consider using scopes for department-specific roles</li>
-        </ul>
-      </div>
-    </div>
-  );
-};
 
 export default RoleManagement;

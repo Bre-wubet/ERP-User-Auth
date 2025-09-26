@@ -121,6 +121,49 @@ app.get('/health', async (req, res) => {
   }
 });
 
+// Health check endpoint
+app.get('/api/health', async (req, res) => {
+  try {
+    // Check database connection
+    await db.client.$queryRaw`SELECT 1`;
+    
+    const healthStatus = {
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: NODE_ENV,
+      version: '1.0.0',
+      services: {
+        database: 'connected',
+        server: 'running'
+      },
+      memory: {
+        used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + ' MB',
+        total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024) + ' MB'
+      }
+    };
+
+    res.status(200).json(healthStatus);
+  } catch (error) {
+    logger.error('Health check failed', { error: error.message });
+    
+    const healthStatus = {
+      status: 'unhealthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: NODE_ENV,
+      version: '1.0.0',
+      services: {
+        database: 'disconnected',
+        server: 'running'
+      },
+      error: error.message
+    };
+
+    res.status(503).json(healthStatus);
+  }
+});
+
 // API routes
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/users', userRoutes);
@@ -139,7 +182,7 @@ app.get('/api', (req, res) => {
       users: '/api/users',
       roles: '/api/roles',
       audit: '/api/audit',
-      health: '/health'
+      health: '/api/health'
     },
     documentation: 'https://github.com/your-repo/erp-auth-api'
   });

@@ -17,6 +17,7 @@ import RegisterForm from './components/auth/RegisterForm';
 import MFAForm from './components/auth/MFAForm';
 import ForgotPasswordForm from './components/auth/ForgotPasswordForm';
 import ResetPasswordForm from './components/auth/ResetPasswordForm';
+import EmailVerification from './components/auth/EmailVerification';
 import Dashboard from './pages/Dashboard';
 import UserManagement from './pages/UserManagement';
 import RoleManagement from './pages/RoleManagement';
@@ -104,6 +105,7 @@ function App() {
               <Route path="/mfa" element={<MFAForm />} />
               <Route path="/forgot-password" element={<ForgotPasswordForm />} />
               <Route path="/reset-password" element={<ResetPasswordForm />} />
+              <Route path="/activate-account" element={<EmailVerification />} />
               
               {/* Protected Routes using shared layout */}
               <Route
