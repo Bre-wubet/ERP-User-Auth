@@ -189,6 +189,15 @@ export const roleAPI = {
   // Get available scopes
   getAvailableScopes: () => api.get('/roles/scopes'),
   
+  // Create scope
+  createScope: (scopeData) => api.post('/roles/scopes', scopeData),
+  
+  // Update scope
+  updateScope: (scopeId, scopeData) => api.put(`/roles/scopes/${scopeId}`, scopeData),
+  
+  // Delete scope
+  deleteScope: (scopeId) => api.delete(`/roles/scopes/${scopeId}`),
+  
   // Get role statistics
   getRoleStats: () => api.get('/roles/stats'),
   

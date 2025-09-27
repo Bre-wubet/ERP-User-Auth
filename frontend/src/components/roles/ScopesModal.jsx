@@ -47,8 +47,8 @@ const ScopesModal = ({
   const { hasRole } = useAuth();
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
-  // Check permissions
-  const canManageScopes = hasRole(['admin', 'manager']);
+  // Check permissions - only admins can create/delete scopes (roles)
+  const canManageScopes = hasRole(['admin']);
 
   // Fetch available scopes
   const { 
@@ -68,13 +68,28 @@ const ScopesModal = ({
     enabled: isOpen,
   });
 
-  // Create scope mutation
+  // Create scope mutation (creates a role with the new scope)
   const createScopeMutation = useMutation({
-    mutationFn: (scopeData) => roleAPI.createScope(scopeData),
+    mutationFn: (scopeData) => {
+      // Create a role with the new scope instead of creating a scope directly
+      // Convert scope name to valid role name format (no spaces, special chars)
+      const validRoleName = (scopeData.name
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '') + '_manager')
+        .substring(0, 50); // Ensure it doesn't exceed 50 characters
+      
+      return roleAPI.createRole({
+        name: validRoleName,
+        scope: scopeData.name.trim()
+      });
+    },
     onSuccess: () => {
       toast.success('Scope created successfully!');
       queryClient.invalidateQueries(['available-scopes']);
       queryClient.invalidateQueries(['roles']);
+      queryClient.invalidateQueries(['roles-for-scopes']);
       setShowCreateForm(false);
       reset();
     },
@@ -84,9 +99,13 @@ const ScopesModal = ({
     }
   });
 
-  // Update scope mutation
+  // Update scope mutation (updates all roles with the old scope to use the new scope)
   const updateScopeMutation = useMutation({
-    mutationFn: ({ scopeId, scopeData }) => roleAPI.updateScope(scopeId, scopeData),
+    mutationFn: ({ scopeId, scopeData }) => {
+      // For now, we'll disable scope updates since it would require updating multiple roles
+      // This is a complex operation that should be handled carefully
+      throw new Error('Scope updates are not currently supported. Please create a new scope instead.');
+    },
     onSuccess: () => {
       toast.success('Scope updated successfully!');
       queryClient.invalidateQueries(['available-scopes']);
@@ -95,21 +114,33 @@ const ScopesModal = ({
       reset();
     },
     onError: (error) => {
-      const errorMessage = error.response?.data?.message || 'Failed to update scope';
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to update scope';
       toast.error(errorMessage);
     }
   });
 
-  // Delete scope mutation
+  // Delete scope mutation (deletes all roles with the specified scope)
   const deleteScopeMutation = useMutation({
-    mutationFn: (scopeId) => roleAPI.deleteScope(scopeId),
+    mutationFn: (scopeName) => {
+      // Find all roles with this scope and delete them
+      const rolesWithScope = roles.filter(role => role.scope === scopeName);
+      if (rolesWithScope.length === 0) {
+        throw new Error('No roles found with this scope');
+      }
+      
+      // Delete all roles with this scope
+      return Promise.all(
+        rolesWithScope.map(role => roleAPI.deleteRole(role.id))
+      );
+    },
     onSuccess: () => {
-      toast.success('Scope deleted successfully!');
+      toast.success('Scope and associated roles deleted successfully!');
       queryClient.invalidateQueries(['available-scopes']);
       queryClient.invalidateQueries(['roles']);
+      queryClient.invalidateQueries(['roles-for-scopes']);
     },
     onError: (error) => {
-      const errorMessage = error.response?.data?.message || 'Failed to delete scope';
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to delete scope';
       toast.error(errorMessage);
     }
   });
@@ -125,7 +156,7 @@ const ScopesModal = ({
   const onSubmit = (data) => {
     if (editingScope) {
       updateScopeMutation.mutate({
-        scopeId: editingScope.id,
+        scopeId: editingScope.name,
         scopeData: data
       });
     } else {
@@ -133,18 +164,24 @@ const ScopesModal = ({
     }
   };
 
-  const handleDeleteScope = (scopeId) => {
-    if (window.confirm('Are you sure you want to delete this scope? This action cannot be undone.')) {
-      deleteScopeMutation.mutate(scopeId);
+  const handleDeleteScope = (scopeName) => {
+    const rolesWithScope = roles.filter(role => role.scope === scopeName);
+    const roleCount = rolesWithScope.length;
+    
+    if (window.confirm(
+      `Are you sure you want to delete the "${scopeName}" scope? This will delete ${roleCount} role(s) associated with this scope. This action cannot be undone.`
+    )) {
+      deleteScopeMutation.mutate(scopeName);
     }
   };
 
-  const handleEditScope = (scope) => {
-    setEditingScope(scope);
+  const handleEditScope = (scopeName) => {
+    setEditingScope({ name: scopeName });
     setShowCreateForm(true);
   };
 
-  const scopes = Array.isArray(scopesData?.data) ? scopesData.data : [];
+  const scopes = Array.isArray(scopesData?.data?.data) ? scopesData.data.data : 
+                 Array.isArray(scopesData?.data) ? scopesData.data : [];
   const roles = Array.isArray(rolesData?.data?.data) ? rolesData.data.data : [];
 
   // Filter scopes based on search
@@ -244,7 +281,7 @@ const ScopesModal = ({
                   View Only Mode
                 </p>
                 <p className="text-xs text-yellow-600 mt-1">
-                  You need admin or manager role to create, edit, or delete scopes.
+                  You need admin role to create, edit, or delete scopes.
                 </p>
               </div>
             </div>

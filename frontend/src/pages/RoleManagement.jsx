@@ -198,10 +198,10 @@ const RoleManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-sage-50 py-8">
-      <div className="max-w-7xl mx-auto sm:px-6 lg:px-2">
+    <div className="min-h-screen bg-sage-50 py-4">
+      <div className="max-w-7xl sm:px-3 lg:px-0">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="h-12 w-12 rounded-full bg-forest-100 flex items-center justify-center mr-4">
