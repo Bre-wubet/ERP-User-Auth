@@ -25,6 +25,7 @@ model User {
   lastLogin     DateTime?
   role          Role        @relation(fields: [roleId], references: [id])
   roleId        String
+  mfaEnabled    Boolean     @default(false) // MFA enabled status
   mfaSecret     String?     // For MFA (TOTP secret, encrypted)
   backupCodes   String[]    @default([]) // Hashed backup codes for MFA
   sessions      Session[]

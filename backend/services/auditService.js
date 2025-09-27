@@ -9,6 +9,7 @@ import logger from '../utils/logger.js';
 export const createAuditLog = async (auditData) => {
     const {
       userId = null,
+      userEmail = null,
       module,
       action,
       details = null,
@@ -16,12 +17,18 @@ export const createAuditLog = async (auditData) => {
     } = auditData;
 
     try {
+      // Include userEmail in details if provided and not already present
+      const enhancedDetails = {
+        ...details,
+        ...(userEmail && !details?.userEmail ? { userEmail } : {})
+      };
+
       const auditLog = await db.client.auditLog.create({
         data: {
           userId,
           module,
           action,
-          details,
+          details: enhancedDetails,
           ip
         },
         include: {
@@ -497,9 +504,10 @@ export const logSecurityEvent = async (event, details, ip = null) => {
     });
   }
 
-export const logAuthEvent = async (event, userId, details, ip = null) => {
+export const logAuthEvent = async (event, userId, details, ip = null, userEmail = null) => {
     return createAuditLog({
       userId,
+      userEmail,
       module: 'authentication',
       action: event,
       details,

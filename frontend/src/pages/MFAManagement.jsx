@@ -56,6 +56,7 @@ const MFAManagement = () => {
   const enableMFAMutation = useMutation({
     mutationFn: authAPI.enableMFA,
     onSuccess: (response) => {
+      console.log('MFA Enable Success Response:', response);
       queryClient.invalidateQueries(['user-profile']);
       setShowSetupModal(false);
       const codes = response?.data?.data?.backupCodes || [];
@@ -66,6 +67,8 @@ const MFAManagement = () => {
       toast.success('MFA enabled successfully');
     },
     onError: (error) => {
+      console.error('MFA Enable Error:', error);
+      console.error('Error Response:', error.response);
       toast.error(error.response?.data?.message || 'Failed to enable MFA');
     },
   });
@@ -89,6 +92,9 @@ const MFAManagement = () => {
   };
 
   const handleEnableMFA = (data) => {
+    console.log('handleEnableMFA called with data:', data);
+    console.log('mfaSecret:', mfaSecret);
+    console.log('Sending request with:', { token: data.token, secret: mfaSecret });
     enableMFAMutation.mutate({ token: data.token, secret: mfaSecret });
   };
 
@@ -137,6 +143,7 @@ const MFAManagement = () => {
             isEnabled={isMFAEnabled}
             onSetup={handleSetupMFA}
             onDisable={() => setShowDisableModal(true)}
+            onViewBackupCodes={handleViewBackupCodes}
             setupLoading={setupMFAMutation.isPending}
             disableLoading={disableMFAMutation.isPending}
           />

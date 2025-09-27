@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { authAPI } from '../../services/api';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import Button from '../ui/Button';
 import Card from '../ui/Card';
 import { Shield, ArrowLeft } from 'lucide-react';
@@ -16,8 +17,13 @@ const MFAForm = () => {
   const [useBackupCode, setUseBackupCode] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { login, isAuthenticated, user } = useAuth();
   
   const credentials = location.state?.credentials;
+  
+  // Debug authentication state
+  console.log('MFAForm - isAuthenticated:', isAuthenticated);
+  console.log('MFAForm - user:', user);
 
   const {
     register,
@@ -40,14 +46,37 @@ const MFAForm = () => {
   const onSubmit = async (data) => {
     try {
       setIsLoading(true);
-      const token = (data.mfaToken || '').toString().trim().toUpperCase();
+      console.log('MFAForm onSubmit called with data:', data);
+      console.log('credentials:', credentials);
+      
+      const token = (data.token || '').toString().trim().toUpperCase();
+      console.log('extracted token:', token);
       
       if (credentials?.email && credentials?.password) {
-        // Login with MFA token
-        await authAPI.login({ ...credentials, mfaToken: token });
-        window.location.href = '/dashboard';
+        // Login with MFA token using AuthContext
+        console.log('Attempting login with MFA token...');
+        const loginData = { ...credentials, mfaToken: token };
+        console.log('Login data:', { ...loginData, password: '[REDACTED]' });
+        
+        const result = await login(loginData);
+        console.log('Login result:', result);
+        
+        if (result.success) {
+          console.log('Login successful, redirecting to dashboard');
+          // Small delay to ensure auth state is updated
+          setTimeout(() => {
+            navigate('/dashboard', { replace: true });
+          }, 100);
+        } else {
+          console.log('Login failed or requires additional MFA');
+          setError('root', {
+            type: 'manual',
+            message: 'Login failed. Please try again.',
+          });
+        }
       } else {
         // Direct MFA verification - redirect to login with a message
+        console.log('No credentials available, showing error message');
         setError('root', {
           type: 'manual',
           message: 'Please log in first, then you will be prompted for your MFA code.',
@@ -57,6 +86,8 @@ const MFAForm = () => {
         }, 2000);
       }
     } catch (error) {
+      console.error('MFA verification error:', error);
+      console.error('Error response:', error.response);
       setError('root', {
         type: 'manual',
         message: error.response?.data?.message || 'Invalid code. Please try again.',
@@ -104,16 +135,7 @@ const MFAForm = () => {
                     placeholder={useBackupCode ? 'XXXXXXXX' : '000000'}
                     useBackupCode={useBackupCode}
                     register={register}
-                    error={errors.mfaToken?.message}
-                    {...register('mfaToken', {
-                      required: useBackupCode ? 'Backup code is required' : 'Authentication code is required',
-                      validate: (value) => {
-                        if (!value) return false;
-                        const v = value.toString().trim().toUpperCase();
-                        if (useBackupCode) return /^[A-F0-9]{8}$/.test(v) || 'Backup code must be 8 hex characters';
-                        return /^\d{6}$/.test(v) || 'Please enter a 6-digit code';
-                      }
-                    })}
+                    error={errors.token?.message}
                   />
                 </div>
 

@@ -251,8 +251,27 @@ async function logAuthAuditEntry(req, res, startTime, responseData, action) {
       authEvent: true
     };
     
+    // Extract user information from response data if available (for login/MFA flows)
+    let userId = req.user?.id;
+    let userEmail = req.user?.email;
+    
+    if (!userId && responseData?.data) {
+      // Try to extract user info from response data
+      if (responseData.data.userId) {
+        userId = responseData.data.userId;
+      } else if (responseData.data.user?.id) {
+        userId = responseData.data.user.id;
+        userEmail = responseData.data.user.email;
+      }
+    }
+    
+    // For login attempts, try to get email from request body
+    if (!userEmail && req.body?.email) {
+      userEmail = req.body.email;
+    }
+    
     // Always log authentication events
-    await auditService.logAuthEvent(action, req.user?.id || null, details, req.ip);
+    await auditService.logAuthEvent(action, userId, details, req.ip, userEmail);
   } catch (error) {
     logger.error('Auth audit logging failed', { 
       error: error.message,

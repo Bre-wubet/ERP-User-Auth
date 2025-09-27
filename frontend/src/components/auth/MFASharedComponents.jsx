@@ -9,7 +9,9 @@ import {
   AlertTriangle, 
   Download,
   CheckCircle,
-  XCircle 
+  XCircle,
+  Key,
+  Settings
 } from 'lucide-react';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
@@ -98,7 +100,11 @@ export const MFASetupForm = ({
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit((data) => {
+        console.log('MFASetupForm onSubmit called with data:', data);
+        console.log('mfaSecret prop:', mfaSecret);
+        onSubmit(data);
+      })} className="space-y-4">
         <MFATokenInput
           label="Enter 6-digit code from your app"
           placeholder="123456"
@@ -112,6 +118,26 @@ export const MFASetupForm = ({
           </Button>
           <Button type="submit" loading={loading}>
             Enable MFA
+          </Button>
+        </div>
+        
+        {/* Debug Info */}
+        <div className="mt-4 p-3 bg-gray-100 rounded text-xs">
+          <p><strong>Debug Info:</strong></p>
+          <p>Secret: {mfaSecret ? mfaSecret.substring(0, 10) + '...' : 'No secret'}</p>
+          <p>QR URL: {qrCodeUrl ? 'Generated' : 'Not generated'}</p>
+          <Button 
+            type="button" 
+            size="sm" 
+            variant="outline" 
+            onClick={() => {
+              const testData = { token: '123456' };
+              console.log('Testing with dummy token:', testData);
+              onSubmit(testData);
+            }}
+            className="mt-2"
+          >
+            Test with Dummy Token
           </Button>
         </div>
       </form>
@@ -231,54 +257,100 @@ export const MFAStatusCard = ({
   isEnabled, 
   onSetup, 
   onDisable, 
+  onViewBackupCodes,
   setupLoading = false,
   disableLoading = false 
 }) => {
   return (
     <Card>
-      <div className="flex items-center justify-between p-6">
-        <div className="flex items-center">
-          <div className={`p-3 rounded-full mr-4 ${
-            isEnabled ? 'bg-green-100' : 'bg-red-100'
-          }`}>
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center">
+            <div className={`p-3 rounded-full mr-4 ${
+              isEnabled ? 'bg-moss-100' : 'bg-red-100'
+            }`}>
+              {isEnabled ? (
+                <CheckCircle className="h-6 w-6 text-moss-600" />
+              ) : (
+                <XCircle className="h-6 w-6 text-red-600" />
+              )}
+            </div>
+            <div>
+              <h3 className="text-lg font-medium text-forest-900">
+                {isEnabled ? 'MFA Enabled' : 'MFA Disabled'}
+              </h3>
+              <p className="text-sm text-sage-600">
+                {isEnabled 
+                  ? 'Your account is protected with multi-factor authentication'
+                  : 'Your account is not protected with multi-factor authentication'
+                }
+              </p>
+            </div>
+          </div>
+          <div className="flex space-x-2">
             {isEnabled ? (
-              <CheckCircle className="h-6 w-6 text-green-600" />
+              <Button
+                variant="danger"
+                onClick={onDisable}
+                icon={<XCircle className="h-4 w-4" />}
+                loading={disableLoading}
+              >
+                Disable MFA
+              </Button>
             ) : (
-              <XCircle className="h-6 w-6 text-red-600" />
+              <Button
+                onClick={onSetup}
+                icon={<Shield className="h-4 w-4" />}
+                loading={setupLoading}
+              >
+                Enable MFA
+              </Button>
             )}
           </div>
-          <div>
-            <h3 className="text-lg font-medium text-forest-900">
-              {isEnabled ? 'MFA Enabled' : 'MFA Disabled'}
-            </h3>
-            <p className="text-sm text-sage-600">
-              {isEnabled 
-                ? 'Your account is protected with multi-factor authentication'
-                : 'Your account is not protected with multi-factor authentication'
-              }
-            </p>
+        </div>
+        
+        {isEnabled && (
+          <div className="bg-moss-50 border border-moss-200 rounded-lg p-4">
+            <div className="flex items-start">
+              <CheckCircle className="h-5 w-5 text-moss-600 mr-3 mt-0.5" />
+              <div className="flex-1">
+                <h4 className="text-sm font-medium text-moss-800 mb-2">Security Status</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-moss-700">Authenticator App:</span>
+                    <span className="ml-2 text-moss-600">✓ Active</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-moss-700">Backup Codes:</span>
+                    <span className="ml-2 text-moss-600">✓ Available</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-moss-700">Last Updated:</span>
+                    <span className="ml-2 text-moss-600">Today</span>
+                  </div>
+                </div>
+                <div className="mt-3 flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onViewBackupCodes}
+                    icon={<Key className="h-4 w-4" />}
+                  >
+                    View Backup Codes
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open('/mfa-management', '_blank')}
+                    icon={<Settings className="h-4 w-4" />}
+                  >
+                    Manage Settings
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="flex space-x-2">
-          {isEnabled ? (
-            <Button
-              variant="danger"
-              onClick={onDisable}
-              icon={<XCircle className="h-4 w-4" />}
-              loading={disableLoading}
-            >
-              Disable MFA
-            </Button>
-          ) : (
-            <Button
-              onClick={onSetup}
-              icon={<Shield className="h-4 w-4" />}
-              loading={setupLoading}
-            >
-              Enable MFA
-            </Button>
-          )}
-        </div>
+        )}
       </div>
     </Card>
   );

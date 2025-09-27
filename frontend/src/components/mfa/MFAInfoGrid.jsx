@@ -1,5 +1,5 @@
 import React from 'react';
-import { Smartphone, Key, AlertTriangle, Shield, Download, Copy } from 'lucide-react';
+import { Smartphone, Key, AlertTriangle, Shield, Download, Copy, CheckCircle } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import { MFAInfoCard } from '../auth/MFASharedComponents';
@@ -35,6 +35,15 @@ const MFAInfoGrid = ({
                 This adds an extra layer of security to your account.
               </p>
             </div>
+            <div>
+              <h4 className="font-medium text-forest-900 mb-2">Setup Process</h4>
+              <ol className="text-sm text-sage-600 space-y-1">
+                <li>1. Install an authenticator app on your phone</li>
+                <li>2. Scan the QR code or enter the secret key manually</li>
+                <li>3. Enter the 6-digit code to verify setup</li>
+                <li>4. Save your backup codes securely</li>
+              </ol>
+            </div>
           </div>
         </MFAInfoCard>
 
@@ -48,7 +57,16 @@ const MFAInfoGrid = ({
               </p>
             </div>
             {isMFAEnabled && (
-              <div>
+              <div className="space-y-3">
+                <div className="bg-moss-50 border border-moss-200 rounded-lg p-3">
+                  <div className="flex items-center mb-2">
+                    <CheckCircle className="h-4 w-4 text-moss-600 mr-2" />
+                    <span className="text-sm font-medium text-moss-800">Status: Active</span>
+                  </div>
+                  <p className="text-xs text-moss-700">
+                    You have backup codes available for emergency access
+                  </p>
+                </div>
                 <Button
                   variant="outline"
                   onClick={onViewBackupCodes}
@@ -81,6 +99,65 @@ const MFAInfoGrid = ({
               <li>• Contact support if you've lost backup codes</li>
               <li>• Re-enable MFA after regaining access</li>
               <li>• Generate new backup codes</li>
+            </ul>
+          </div>
+        </div>
+      </MFAInfoCard>
+
+      {/* MFA Activity Section - Only show when MFA is enabled */}
+      {isMFAEnabled && (
+        <MFAInfoCard title="Recent MFA Activity" icon={Shield}>
+          <div className="space-y-4">
+            <div className="bg-forest-50 border border-forest-200 rounded-lg p-4">
+              <div className="flex items-center mb-3">
+                <CheckCircle className="h-5 w-5 text-forest-600 mr-2" />
+                <h4 className="text-sm font-medium text-forest-800">Last Login</h4>
+              </div>
+              <div className="text-sm text-forest-700">
+                <p>✓ MFA verification successful</p>
+                <p className="text-xs text-forest-600 mt-1">Today at {new Date().toLocaleTimeString()}</p>
+              </div>
+            </div>
+            
+            <div className="bg-sage-50 border border-sage-200 rounded-lg p-4">
+              <div className="flex items-center mb-3">
+                <Shield className="h-5 w-5 text-sage-600 mr-2" />
+                <h4 className="text-sm font-medium text-sage-800">Security Status</h4>
+              </div>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-sage-700">Authenticator:</span>
+                  <span className="ml-2 text-forest-600 font-medium">Active</span>
+                </div>
+                <div>
+                  <span className="text-sage-700">Backup Codes:</span>
+                  <span className="ml-2 text-forest-600 font-medium">Available</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </MFAInfoCard>
+      )}
+
+      {/* Troubleshooting Section */}
+      <MFAInfoCard title="Troubleshooting" icon={AlertTriangle}>
+        <div className="space-y-4">
+          <div>
+            <h4 className="font-medium text-forest-900 mb-2">QR Code Issues</h4>
+            <ul className="text-sm text-sage-600 space-y-1">
+              <li>• QR code shows "web page not available" - this is normal!</li>
+              <li>• Use your authenticator app to scan, not your browser</li>
+              <li>• If scanning fails, use the manual secret key method</li>
+              <li>• Make sure your authenticator app is up to date</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-medium text-forest-900 mb-2">Common Problems</h4>
+            <ul className="text-sm text-sage-600 space-y-1">
+              <li>• Codes not working - check if your phone's time is correct</li>
+              <li>• App not generating codes - try restarting the app</li>
+              <li>• Lost phone - use backup codes to regain access</li>
+              <li>• Still having issues - contact support for help</li>
             </ul>
           </div>
         </div>

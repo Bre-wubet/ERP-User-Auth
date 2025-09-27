@@ -38,6 +38,21 @@ const MFASetupModal = ({
             </div>
           </div>
 
+          {/* Important Note */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div className="flex items-start">
+              <div className="h-5 w-5 text-blue-600 mr-3 mt-0.5">ℹ️</div>
+              <div>
+                <h4 className="text-sm font-medium text-blue-800 mb-1">Important Note</h4>
+                <p className="text-sm text-blue-700">
+                  The QR code contains a special URL that only authenticator apps can read. 
+                  If you click on it in your browser, you'll see an error - this is normal! 
+                  Use your authenticator app to scan the QR code instead.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Instructions */}
           <div className="bg-sage-50 border border-sage-200 rounded-lg p-4">
             <div className="flex items-start">
@@ -46,10 +61,32 @@ const MFASetupModal = ({
                 <h4 className="text-sm font-medium text-sage-800 mb-2">Setup Instructions</h4>
                 <ol className="text-sm text-sage-700 space-y-1">
                   <li>1. Install an authenticator app on your mobile device</li>
-                  <li>2. Scan the QR code below with your authenticator app</li>
-                  <li>3. Enter the 6-digit code from your app to verify</li>
-                  <li>4. Save your backup codes in a secure location</li>
+                  <li>2. Open your authenticator app and tap "Add Account" or "+"</li>
+                  <li>3. Choose "Scan QR Code" and scan the code below</li>
+                  <li>4. Enter the 6-digit code from your app to verify</li>
+                  <li>5. Save your backup codes in a secure location</li>
                 </ol>
+              </div>
+            </div>
+          </div>
+
+          {/* Alternative Setup Method */}
+          <div className="bg-forest-50 border border-forest-200 rounded-lg p-4">
+            <div className="flex items-start">
+              <QrCode className="h-5 w-5 text-forest-600 mr-3 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-medium text-forest-800 mb-2">Can't Scan QR Code?</h4>
+                <p className="text-sm text-forest-700 mb-2">
+                  If you can't scan the QR code, you can manually enter the secret key:
+                </p>
+                <div className="bg-white border border-forest-200 rounded p-2 mb-2">
+                  <code className="text-xs text-forest-800 break-all">
+                    {mfaSecret}
+                  </code>
+                </div>
+                <p className="text-xs text-forest-600">
+                  In your authenticator app, choose "Enter a setup key" and paste this secret.
+                </p>
               </div>
             </div>
           </div>
@@ -57,16 +94,38 @@ const MFASetupModal = ({
           {/* QR Code Section */}
           {qrCodeUrl && (
             <div className="text-center">
-              <div className="inline-block p-4 bg-white border border-sage-200 rounded-lg">
+              <div className="inline-block p-4 bg-white border border-sage-200 rounded-lg shadow-sm">
                 <img 
                   src={qrCodeUrl} 
                   alt="MFA QR Code" 
                   className="w-48 h-48"
                 />
               </div>
-              <p className="text-sm text-sage-600 mt-2">
-                Scan this QR code with your authenticator app
-              </p>
+              <div className="mt-4 space-y-2">
+                <p className="text-sm text-sage-600">
+                  Scan this QR code with your authenticator app
+                </p>
+                <div className="flex items-center justify-center space-x-4">
+                  <button
+                    onClick={() => navigator.clipboard.writeText(mfaSecret)}
+                    className="text-xs text-forest-600 hover:text-forest-700 underline"
+                  >
+                    Copy Secret Key
+                  </button>
+                  <span className="text-xs text-sage-400">•</span>
+                  <button
+                    onClick={() => {
+                      const link = document.createElement('a');
+                      link.href = qrCodeUrl;
+                      link.download = 'mfa-qr-code.png';
+                      link.click();
+                    }}
+                    className="text-xs text-forest-600 hover:text-forest-700 underline"
+                  >
+                    Download QR Code
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 

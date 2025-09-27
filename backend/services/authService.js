@@ -421,7 +421,11 @@ export const enableMFA = async (userId, token, secret) => {
 
       await db.client.user.update({
         where: { id: userId },
-        data: { mfaSecret: secret, backupCodes: hashedCodes }
+        data: { 
+          mfaSecret: secret, 
+          backupCodes: hashedCodes,
+          mfaEnabled: true
+        }
       });
 
       // Send MFA setup confirmation email
@@ -483,7 +487,11 @@ export const disableMFA = async (userId, token) => {
       // Remove MFA secret
       await db.client.user.update({
         where: { id: userId },
-        data: { mfaSecret: null, backupCodes: [] }
+        data: { 
+          mfaSecret: null, 
+          backupCodes: [],
+          mfaEnabled: false
+        }
       });
 
       logger.auth('mfa_disabled', user);
