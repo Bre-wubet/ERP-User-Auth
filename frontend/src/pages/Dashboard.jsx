@@ -183,11 +183,11 @@ const Dashboard = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-6 text-white">
+      <div className="bg-gradient-to-r from-forest-600 to-forest-700 rounded-lg p-6 text-white">
         <h1 className="text-2xl font-bold mb-2">
           Welcome back, {user?.firstName}!
         </h1>
-        <p className="text-blue-100">
+        <p className="text-forest-100">
           Here's what's happening with your ERP system today.
         </p>
       </div>
@@ -195,17 +195,17 @@ const Dashboard = () => {
       {/* Role Information */}
       <Card>
         <div className="flex items-start">
-          <Info className="h-6 w-6 text-blue-500 mr-3 mt-1" />
+          <Info className="h-6 w-6 text-forest-500 mr-3 mt-1" />
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Your Role & Permissions</h3>
+            <h3 className="text-lg font-medium text-forest-900 mb-2">Your Role & Permissions</h3>
             <div className="space-y-2">
-              <p className="text-sm text-gray-600">
-                <strong>Current Role:</strong> <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">{user?.role?.name || 'No Role'}</span>
+              <p className="text-sm text-sage-600">
+                <strong>Current Role:</strong> <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-forest-100 text-forest-800">{user?.role?.name || 'No Role'}</span>
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-sage-600">
                 <strong>Available Features:</strong>
               </p>
-              <ul className="text-sm text-gray-600 ml-4 space-y-1">
+              <ul className="text-sm text-sage-600 ml-4 space-y-1">
                 <li>• Dashboard - View system overview</li>
                 <li>• Profile - Manage your account settings</li>
                 {user?.role?.name === 'admin' && (

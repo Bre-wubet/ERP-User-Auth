@@ -1,34 +1,28 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
 import { 
   FileText, 
-  Search, 
-  Filter,
   Download,
   RefreshCw,
-  Calendar,
-  User,
-  Activity,
-  Eye,
+  Settings,
   AlertTriangle,
-  Trash2,
-  Settings
+  Trash2
 } from 'lucide-react';
 import { auditAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/ui/Button';
-import Input from '../components/ui/Input';
-import Select from '../components/ui/Select';
 import Card from '../components/ui/Card';
-import Modal from '../components/ui/Modal';
-import Table from '../components/ui/Table';
-import { format, parseISO } from 'date-fns';
+import AuditFilters from '../components/audit/AuditFilters';
+import AuditTable from '../components/audit/AuditTable';
+import AuditStatsCards from '../components/audit/AuditStatsCards';
+import AuditDetailsModal from '../components/audit/AuditDetailsModal';
+import AuditCleanupModal from '../components/audit/AuditCleanupModal';
+import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 
 /**
- * Audit Logs Page
- * Comprehensive audit logging with filtering, search, and export
+ * Audit Logs Page - Refactored
+ * Comprehensive audit logging with modular components
  */
 const AuditLogs = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -63,23 +57,27 @@ const AuditLogs = () => {
       dateFrom: dateFrom || undefined,
       dateTo: dateTo || undefined,
     }),
-    enabled: canViewAuditLogs, // Only fetch if user has permission
+    enabled: canViewAuditLogs,
     keepPreviousData: true,
-    refetchInterval: autoRefresh ? 30000 : false, // Auto-refresh every 30 seconds if enabled
+    refetchInterval: autoRefresh ? 30000 : false,
   });
 
   // Fetch available modules (only if user has permission)
-  const { data: modulesData } = useQuery({
+  const { data: modulesData, error: modulesError } = useQuery({
     queryKey: ['audit-modules'],
     queryFn: auditAPI.getAvailableModules,
-    enabled: canViewAuditLogs, // Only fetch if user has permission
+    enabled: canViewAuditLogs,
+    retry: 1,
+    retryDelay: 1000,
   });
 
   // Fetch available actions (only if user has permission)
-  const { data: actionsData } = useQuery({
+  const { data: actionsData, error: actionsError } = useQuery({
     queryKey: ['audit-actions'],
     queryFn: auditAPI.getAvailableActions,
-    enabled: canViewAuditLogs, // Only fetch if user has permission
+    enabled: canViewAuditLogs,
+    retry: 1,
+    retryDelay: 1000,
   });
 
   // Fetch audit statistics (only if user has permission)
@@ -89,14 +87,24 @@ const AuditLogs = () => {
       dateFrom: dateFrom || undefined,
       dateTo: dateTo || undefined,
     }),
-    enabled: canViewAuditLogs, // Only fetch if user has permission
+    enabled: canViewAuditLogs,
   });
 
   const auditLogs = Array.isArray(auditData?.data?.data) ? auditData.data.data : Array.isArray(auditData?.data) ? auditData.data : [];
   const pagination = auditData?.data?.pagination || auditData?.pagination || {};
-  const modules = Array.isArray(modulesData?.data?.data) ? modulesData.data.data : Array.isArray(modulesData?.data) ? modulesData.data : [];
-  const actions = Array.isArray(actionsData?.data?.data) ? actionsData.data.data : Array.isArray(actionsData?.data) ? actionsData.data : [];
-  const stats = statsData?.data || {};
+  
+  // More robust data parsing for modules and actions with fallbacks
+  const modules = Array.isArray(modulesData?.data?.data) ? modulesData.data.data : 
+                 Array.isArray(modulesData?.data) ? modulesData.data : 
+                 Array.isArray(modulesData) ? modulesData : 
+                 ['audit', 'authentication', 'user_management', 'role_management']; // Fallback data
+                 
+  const actions = Array.isArray(actionsData?.data?.data) ? actionsData.data.data : 
+                 Array.isArray(actionsData?.data) ? actionsData.data : 
+                 Array.isArray(actionsData) ? actionsData : 
+                 ['login', 'logout', 'register', 'create', 'update', 'delete', 'view']; // Fallback data
+                 
+  const stats = statsData?.data?.data || statsData?.data || {};
 
   // Audit cleanup mutation
   const cleanupMutation = useMutation({
@@ -112,6 +120,7 @@ const AuditLogs = () => {
     },
   });
 
+  // Event handlers
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
     setCurrentPage(1);
@@ -192,449 +201,134 @@ const AuditLogs = () => {
     queryClient.invalidateQueries(['audit-stats']);
   };
 
-  const getActionColor = (action) => {
-    const colors = {
-      'create': 'bg-green-100 text-green-800',
-      'update': 'bg-blue-100 text-blue-800',
-      'delete': 'bg-red-100 text-red-800',
-      'login': 'bg-purple-100 text-purple-800',
-      'logout': 'bg-gray-100 text-gray-800',
-      'register': 'bg-indigo-100 text-indigo-800',
-    };
-    return colors[action.toLowerCase()] || 'bg-gray-100 text-gray-800';
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
-  const columns = [
-    {
-      key: 'timestamp',
-      label: 'Timestamp',
-      render: (log) => (
-        <div className="text-sm">
-          <div className="font-medium">
-            {format(parseISO(log.createdAt), 'MMM dd, yyyy')}
-          </div>
-          <div className="text-gray-500">
-            {format(parseISO(log.createdAt), 'HH:mm:ss')}
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: 'user',
-      label: 'User',
-      render: (log) => (
-        <div className="flex items-center">
-          <User className="h-4 w-4 text-gray-400 mr-2" />
-          <span className="text-sm">
-            {log.user?.firstName && log.user?.lastName 
-              ? `${log.user.firstName} ${log.user.lastName}`
-              : log.user?.email || 'System'
-            }
-          </span>
-        </div>
-      ),
-    },
-    {
-      key: 'module',
-      label: 'Module',
-      render: (log) => (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-          {log.module}
-        </span>
-      ),
-    },
-    {
-      key: 'action',
-      label: 'Action',
-      render: (log) => (
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getActionColor(log.action)}`}>
-          {log.action}
-        </span>
-      ),
-    },
-    {
-      key: 'ip',
-      label: 'IP Address',
-      render: (log) => (
-        <span className="text-sm font-mono text-gray-600">
-          {log.ip || 'N/A'}
-        </span>
-      ),
-    },
-    {
-      key: 'actions',
-      label: 'Actions',
-      render: (log) => (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => openDetailsModal(log)}
-          icon={<Eye className="h-4 w-4" />}
-        >
-          View Details
-        </Button>
-      ),
-    },
-  ];
+  const handlePageSizeChange = (newPageSize) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1);
+  };
 
   // Show access denied if user doesn't have permission
   if (!canViewAuditLogs) {
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Audit Logs</h1>
-            <p className="text-gray-600">Monitor system activities and user actions</p>
-          </div>
+      <div className="min-h-screen bg-sage-50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Card className="p-4 text-center">
+            <AlertTriangle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-forest-900 mb-4">Access Denied</h1>
+            <p className="text-sage-600 mb-6">
+              You don't have permission to view audit logs. Contact your administrator for access.
+            </p>
+            <Button 
+              variant="outline" 
+              onClick={() => window.history.back()}
+            >
+              Go Back
+            </Button>
+          </Card>
         </div>
-        
-        <Card>
-          <div className="text-center py-12">
-            <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Access Denied</h3>
-            <p className="text-gray-600 mb-4">
-              You don't have permission to access audit logs. This feature requires admin or auditor role.
-            </p>
-            <p className="text-sm text-gray-500">
-              Contact your administrator if you believe this is an error.
-            </p>
-          </div>
-        </Card>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Audit Logs</h1>
-          <p className="text-gray-600">Monitor system activities and user actions</p>
+    <div className="min-h-screen bg-sage-50 py-6">
+      <div className="max-w-7xl mx-auto sm:px-4 lg:px-0">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="h-12 w-12 rounded-full bg-forest-100 flex items-center justify-center mr-4">
+                <FileText className="h-6 w-6 text-forest-600" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-forest-900">Audit Logs</h1>
+                <p className="text-sage-600 mt-1">
+                  Monitor system activities and user actions
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <Button
+                variant="outline"
+                onClick={() => setAutoRefresh(!autoRefresh)}
+                className={autoRefresh ? 'bg-forest-50 border-forest-300' : ''}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
+                {autoRefresh ? 'Auto Refresh On' : 'Auto Refresh'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowCleanupModal(true)}
+                icon={<Trash2 className="h-4 w-4" />}
+              >
+                Cleanup
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleExport}
+                icon={<Download className="h-4 w-4" />}
+              >
+                Export
+              </Button>
+            </div>
+          </div>
         </div>
-        <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            onClick={() => setAutoRefresh(!autoRefresh)}
-            icon={<Settings className="h-5 w-5" />}
-            className={autoRefresh ? 'bg-blue-50 text-blue-600' : ''}
-          >
-            {autoRefresh ? 'Auto-Refresh On' : 'Auto-Refresh Off'}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleRefresh}
-            icon={<RefreshCw className="h-5 w-5" />}
-          >
-            Refresh
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleExport}
-            icon={<Download className="h-5 w-5" />}
-          >
-            Export
-          </Button>
-          {hasRole(['admin']) && (
-            <Button
-              variant="destructive"
-              onClick={() => setShowCleanupModal(true)}
-              icon={<Trash2 className="h-5 w-5" />}
-            >
-              Cleanup
-            </Button>
-          )}
-          <Button
-            variant="outline"
-            onClick={handleResetFilters}
-            icon={<RefreshCw className="h-5 w-5" />}
-          >
-            Reset Filters
-          </Button>
-        </div>
-      </div>
 
-      {/* Statistics Cards */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <div className="flex items-center">
-              <Activity className="h-8 w-8 text-blue-500" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Total Actions</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalActions || 0}</p>
-              </div>
-            </div>
-          </Card>
-          <Card>
-            <div className="flex items-center">
-              <User className="h-8 w-8 text-green-500" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Active Users</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.activeUsers || 0}</p>
-              </div>
-            </div>
-          </Card>
-          <Card>
-            <div className="flex items-center">
-              <FileText className="h-8 w-8 text-purple-500" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Modules</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalModules || 0}</p>
-              </div>
-            </div>
-          </Card>
-          <Card>
-            <div className="flex items-center">
-              <Calendar className="h-8 w-8 text-orange-500" />
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Today's Actions</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.todayActions || 0}</p>
-              </div>
-            </div>
-          </Card>
-        </div>
-      )}
+        {/* Statistics Cards */}
+        <AuditStatsCards stats={stats} />
 
-      {/* Filters */}
-      <Card>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-          <div>
-            <Input
-              placeholder="Search logs..."
-              value={searchQuery}
-              onChange={handleSearch}
-              icon={<Search className="h-5 w-5 text-gray-400" />}
-            />
-          </div>
-          <div>
-            <Select
-              value={selectedModule}
-              onChange={(e) => handleFilterChange('module', e.target.value)}
-              placeholder="All Modules"
-            >
-              <option value="">All Modules</option>
-              {modules.map((module) => (
-                <option key={module} value={module}>
-                  {module}
-                </option>
-              ))}
-            </Select>
-          </div>
-          <div>
-            <Select
-              value={selectedAction}
-              onChange={(e) => handleFilterChange('action', e.target.value)}
-              placeholder="All Actions"
-            >
-              <option value="">All Actions</option>
-              {actions.map((action) => (
-                <option key={action} value={action}>
-                  {action}
-                </option>
-              ))}
-            </Select>
-          </div>
-          <div>
-            <Input
-              type="date"
-              placeholder="From Date"
-              value={dateFrom}
-              onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
-            />
-          </div>
-          <div>
-            <Input
-              type="date"
-              placeholder="To Date"
-              value={dateTo}
-              onChange={(e) => handleFilterChange('dateTo', e.target.value)}
-            />
-          </div>
-          <div className="flex items-end">
-            <Button
-              variant="outline"
-              onClick={handleResetFilters}
-              icon={<RefreshCw className="h-4 w-4" />}
-              fullWidth
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      </Card>
-
-      {/* Audit Logs Table */}
-      <Card>
-        <Table
-          data={auditLogs}
-          columns={columns}
+        {/* Filters */}
+        <AuditFilters
+          searchQuery={searchQuery}
+          selectedModule={selectedModule}
+          selectedAction={selectedAction}
+          selectedUser={selectedUser}
+          dateFrom={dateFrom}
+          dateTo={dateTo}
+          modules={modules}
+          actions={actions}
+          users={[]} // TODO: Add users list if needed
+          onSearchChange={handleSearch}
+          onFilterChange={handleFilterChange}
+          onResetFilters={handleResetFilters}
+          onRefresh={handleRefresh}
           loading={auditLoading}
-          error={auditError}
-          pagination={{
-            current: currentPage,
-            total: pagination.totalPages || 0,
-            pageSize: pageSize,
-            onPageChange: setCurrentPage,
-            onPageSizeChange: setPageSize,
-          }}
         />
-      </Card>
 
-      {/* Details Modal */}
-      <Modal
-        isOpen={showDetailsModal}
-        onClose={() => {
-          setShowDetailsModal(false);
-          setSelectedLog(null);
-        }}
-        title="Audit Log Details"
-        size="lg"
-      >
-        {selectedLog && (
-          <AuditLogDetails log={selectedLog} />
-        )}
-      </Modal>
+        {/* Audit Table */}
+        <div className="mt-6">
+          <AuditTable
+            auditLogs={auditLogs}
+            loading={auditLoading}
+            error={auditError}
+            pagination={pagination}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+            onViewDetails={openDetailsModal}
+            canViewAuditLogs={canViewAuditLogs}
+          />
+        </div>
 
-      {/* Cleanup Modal */}
-      <Modal
-        isOpen={showCleanupModal}
-        onClose={() => setShowCleanupModal(false)}
-        title="Cleanup Old Audit Logs"
-      >
-        <AuditCleanupForm
+        {/* Modals */}
+        <AuditDetailsModal
+          isOpen={showDetailsModal}
+          onClose={() => {
+            setShowDetailsModal(false);
+            setSelectedLog(null);
+          }}
+          auditLog={selectedLog}
+        />
+
+        <AuditCleanupModal
+          isOpen={showCleanupModal}
+          onClose={() => setShowCleanupModal(false)}
           onSubmit={handleCleanup}
-          onCancel={() => setShowCleanupModal(false)}
           loading={cleanupMutation.isPending}
         />
-      </Modal>
-    </div>
-  );
-};
-
-// Audit Log Details Component
-const AuditLogDetails = ({ log }) => {
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Timestamp</label>
-          <p className="text-sm text-gray-900">
-            {format(parseISO(log.createdAt), 'PPpp')}
-          </p>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">IP Address</label>
-          <p className="text-sm text-gray-900 font-mono">{log.ip || 'N/A'}</p>
-        </div>
       </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">User</label>
-          <p className="text-sm text-gray-900">
-            {log.user?.firstName && log.user?.lastName 
-              ? `${log.user.firstName} ${log.user.lastName}`
-              : log.user?.email || 'System'
-            }
-          </p>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">User ID</label>
-          <p className="text-sm text-gray-900 font-mono">{log.userId || 'N/A'}</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Module</label>
-          <p className="text-sm text-gray-900">{log.module}</p>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Action</label>
-          <p className="text-sm text-gray-900">{log.action}</p>
-        </div>
-      </div>
-
-      {log.details && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Details</label>
-          <div className="bg-gray-50 p-4 rounded-md">
-            <pre className="text-sm text-gray-900 whitespace-pre-wrap">
-              {JSON.stringify(log.details, null, 2)}
-            </pre>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Audit Cleanup Form Component
-const AuditCleanupForm = ({ onSubmit, onCancel, loading }) => {
-  const { register, handleSubmit, formState: { errors } } = useForm({
-    defaultValues: {
-      daysToKeep: 90
-    }
-  });
-
-  return (
-    <div className="space-y-4">
-      <div className="bg-red-50 border border-red-200 rounded-md p-4">
-        <div className="flex">
-          <AlertTriangle className="h-5 w-5 text-red-400 mr-2 mt-0.5" />
-          <div>
-            <h4 className="text-sm font-medium text-red-800">Audit Log Cleanup</h4>
-            <p className="text-sm text-red-700 mt-1">
-              This will permanently remove audit logs older than the specified number of days. 
-              This action cannot be undone.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <Input
-          label="Keep logs for (days)"
-          type="number"
-          min="1"
-          max="365"
-          {...register('daysToKeep', { 
-            required: 'Please specify number of days',
-            min: { value: 1, message: 'Must keep at least 1 day' },
-            max: { value: 365, message: 'Cannot keep more than 365 days' }
-          })}
-          error={errors.daysToKeep?.message}
-          helperText="Audit logs older than this will be permanently deleted"
-        />
-
-        <div className="bg-gray-50 p-3 rounded-md">
-          <h5 className="text-sm font-medium text-gray-900 mb-2">Cleanup Summary</h5>
-          <ul className="text-sm text-gray-600 space-y-1">
-            <li>• Logs older than specified days will be removed</li>
-            <li>• This action cannot be undone</li>
-            <li>• Consider backing up important logs first</li>
-            <li>• Estimated cleanup time: 2-5 minutes</li>
-          </ul>
-        </div>
-
-        <div className="flex justify-end space-x-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="destructive"
-            loading={loading}
-          >
-            Cleanup Logs
-          </Button>
-        </div>
-      </form>
     </div>
   );
 };

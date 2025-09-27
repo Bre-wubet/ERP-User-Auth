@@ -309,7 +309,7 @@ export const removeRoleFromUser = async (userId, defaultRoleId) => {
 
 export const getRoleStats = async () => {
     try {
-      const [totalRoles, rolesByScope, usersByRole] = await Promise.all([
+      const [totalRoles, rolesByScope, usersByRole, totalUsers, activeUsers, uniqueScopes] = await Promise.all([
         db.client.role.count(),
         db.client.role.groupBy({
           by: ['scope'],
@@ -330,11 +330,29 @@ export const getRoleStats = async () => {
               _count: 'desc'
             }
           }
+        }),
+        // Count total users across all roles
+        db.client.user.count(),
+        // Count active users across all roles
+        db.client.user.count({
+          where: {
+            isActive: true
+          }
+        }),
+        // Count unique scopes
+        db.client.role.findMany({
+          select: {
+            scope: true
+          },
+          distinct: ['scope']
         })
       ]);
 
       return {
         totalRoles,
+        totalUsers,
+        activeUsers,
+        totalScopes: uniqueScopes.length,
         rolesByScope: rolesByScope.reduce((acc, item) => {
           acc[item.scope || 'global'] = item._count.id;
           return acc;

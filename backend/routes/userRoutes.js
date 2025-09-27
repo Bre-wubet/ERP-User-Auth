@@ -123,9 +123,9 @@ router.delete('/:userId/sessions',
   revokeAllSessions
 );
 
-// Get user statistics (owner or admin/manager/hr)
+// Get user statistics (admin/manager/hr only)
 router.get('/:userId/stats', 
-  requireOwnerOrAdmin('userId'),
+  requireUserManagement,
   auditUserManagement('user_stats_viewed'),
   getUserStats
 );

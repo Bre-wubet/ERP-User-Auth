@@ -21,13 +21,13 @@ const Button = ({
   const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
   
   const variants = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
-    secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500',
-    success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500',
+    primary: 'bg-forest-600 text-white hover:bg-forest-700 focus:ring-forest-500',
+    secondary: 'bg-sage-200 text-forest-900 hover:bg-sage-300 focus:ring-sage-500',
+    success: 'bg-moss-600 text-white hover:bg-moss-700 focus:ring-moss-500',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
     warning: 'bg-yellow-600 text-white hover:bg-yellow-700 focus:ring-yellow-500',
-    outline: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-blue-500',
-    ghost: 'text-gray-700 hover:bg-gray-100 focus:ring-gray-500',
+    outline: 'border border-sage-300 bg-white text-forest-700 hover:bg-forest-50 focus:ring-forest-500',
+    ghost: 'text-forest-700 hover:bg-sage-100 focus:ring-sage-500',
   };
 
   const sizes = {

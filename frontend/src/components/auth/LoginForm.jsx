@@ -5,7 +5,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Card from '../ui/Card';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Shield } from 'lucide-react';
 
 /**
  * Login Form Component
@@ -50,17 +50,17 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-forest-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-3xl font-extrabold text-forest-900">
             Sign in to your account
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-sage-600">
             Or{' '}
             <Link
               to="/register"
-              className="font-medium text-blue-600 hover:text-blue-500"
+              className="font-medium text-forest-600 hover:text-forest-500"
             >
               create a new account
             </Link>
@@ -88,7 +88,7 @@ const LoginForm = () => {
                     message: 'Invalid email address',
                   },
                 })}
-                icon={<Mail className="h-5 w-5 text-gray-400" />}
+                icon={<Mail className="h-5 w-5 text-sage-400" />}
               />
             </div>
 
@@ -109,7 +109,7 @@ const LoginForm = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-sage-400 hover:text-sage-600"
                   >
                     {showPassword ? (
                       <EyeOff className="h-5 w-5" />
@@ -127,9 +127,9 @@ const LoginForm = () => {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-forest-600 focus:ring-forest-500 border-sage-300 rounded"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-forest-900">
                   Remember me
                 </label>
               </div>
@@ -137,7 +137,7 @@ const LoginForm = () => {
               <div className="text-sm">
                 <Link
                   to="/forgot-password"
-                  className="font-medium text-blue-600 hover:text-blue-500"
+                  className="font-medium text-forest-600 hover:text-forest-500"
                 >
                   Forgot your password?
                 </Link>
@@ -156,15 +156,36 @@ const LoginForm = () => {
                 {isLoading ? 'Signing in...' : 'Sign in'}
               </Button>
             </div>
+
+            <div className="mt-4">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-sage-300" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-sage-500">Or</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <Link
+                to="/mfa"
+                className="w-full flex justify-center items-center px-4 py-2 border border-forest-300 rounded-md shadow-sm bg-white text-sm font-medium text-forest-700 hover:bg-forest-50 hover:text-forest-800 transition-colors duration-200"
+              >
+                <Shield className="h-4 w-4 mr-2" />
+                Access with Multi-Factor Authentication
+              </Link>
+            </div>
           </form>
         </Card>
 
         <div className="text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-sage-600">
             Need help?{' '}
             <Link
               to="/support"
-              className="font-medium text-blue-600 hover:text-blue-500"
+              className="font-medium text-forest-600 hover:text-forest-500"
             >
               Contact support
             </Link>

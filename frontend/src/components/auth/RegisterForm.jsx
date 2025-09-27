@@ -52,10 +52,6 @@ const RegisterForm = () => {
 
   const roles = Array.isArray(rolesData?.data?.data) ? rolesData.data.data : Array.isArray(rolesData?.data) ? rolesData.data : [];
   
-  // Debug: Log the data structure
-  // console.log('Roles data:', rolesData);
-  // console.log('Roles array:', roles);
-
   const onSubmit = async (data) => {
     try {
       setIsLoading(true);

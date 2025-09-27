@@ -29,7 +29,7 @@ const Card = ({
   };
 
   const classes = clsx(
-    'bg-white rounded-lg border border-gray-200',
+    'bg-white rounded-lg border border-sage-200',
     paddingClasses[padding],
     shadowClasses[shadow],
     className
@@ -44,7 +44,7 @@ const Card = ({
 
 const CardHeader = ({ children, className = '', ...props }) => {
   return (
-    <div className={clsx('border-b border-gray-200 pb-4 mb-4', className)} {...props}>
+    <div className={clsx('border-b border-sage-200 pb-4 mb-4', className)} {...props}>
       {children}
     </div>
   );
@@ -52,7 +52,7 @@ const CardHeader = ({ children, className = '', ...props }) => {
 
 const CardTitle = ({ children, className = '', ...props }) => {
   return (
-    <h3 className={clsx('text-lg font-semibold text-gray-900', className)} {...props}>
+    <h3 className={clsx('text-lg font-semibold text-forest-900', className)} {...props}>
       {children}
     </h3>
   );
@@ -60,7 +60,7 @@ const CardTitle = ({ children, className = '', ...props }) => {
 
 const CardDescription = ({ children, className = '', ...props }) => {
   return (
-    <p className={clsx('text-sm text-gray-600 mt-1', className)} {...props}>
+    <p className={clsx('text-sm text-sage-600 mt-1', className)} {...props}>
       {children}
     </p>
   );
@@ -76,7 +76,7 @@ const CardContent = ({ children, className = '', ...props }) => {
 
 const CardFooter = ({ children, className = '', ...props }) => {
   return (
-    <div className={clsx('border-t border-gray-200 pt-4 mt-4', className)} {...props}>
+    <div className={clsx('border-t border-sage-200 pt-4 mt-4', className)} {...props}>
       {children}
     </div>
   );

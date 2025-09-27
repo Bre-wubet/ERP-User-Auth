@@ -19,7 +19,7 @@ const Select = React.forwardRef(({
   return (
     <div className="space-y-2">
       {label && (
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-forest-700">
           {label}
         </label>
       )}
@@ -34,14 +34,14 @@ const Select = React.forwardRef(({
         <select
           ref={ref}
           className={cn(
-            "block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400",
-            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-            "disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed",
+            "block w-full px-3 py-2 border border-sage-300 rounded-md shadow-sm placeholder-sage-400",
+            "focus:outline-none focus:ring-2 focus:ring-forest-500 focus:border-forest-500",
+            "disabled:bg-sage-50 disabled:text-sage-500 disabled:cursor-not-allowed",
             "text-sm",
             icon ? "pl-10" : "pl-3",
             error 
               ? "border-red-300 focus:ring-red-500 focus:border-red-500" 
-              : "border-gray-300",
+              : "border-sage-300",
             className
           )}
           {...props}
@@ -53,7 +53,7 @@ const Select = React.forwardRef(({
         </select>
         
         <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-          <ChevronDown className="h-4 w-4 text-gray-400" />
+          <ChevronDown className="h-4 w-4 text-sage-400" />
         </div>
       </div>
       
@@ -62,7 +62,7 @@ const Select = React.forwardRef(({
       )}
       
       {helperText && !error && (
-        <p className="text-sm text-gray-500">{helperText}</p>
+        <p className="text-sm text-sage-500">{helperText}</p>
       )}
     </div>
   );
