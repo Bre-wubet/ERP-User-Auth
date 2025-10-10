@@ -125,3 +125,5 @@
 {"timestamp":"2025-09-27T03:47:11.704Z","level":"WARN","message":"Security event: login_failed_invalid_password","event":"login_failed_invalid_password","userId":"cmfrwuebu0006vzzcng9ypuv6","email":"briecoder@gmail.com","ip":"::1"}
 {"timestamp":"2025-09-27T03:47:23.902Z","level":"WARN","message":"Security event: login_failed_invalid_password","event":"login_failed_invalid_password","userId":"cmfrwuebu0006vzzcng9ypuv6","email":"briecoder@gmail.com","ip":"::1"}
 {"timestamp":"2025-09-27T05:57:39.907Z","level":"WARN","message":"Security event: login_failed_invalid_password","event":"login_failed_invalid_password","userId":"cmfrx37f00009vzlc9nfkzk7m","email":"brwubet@gmail.com","ip":"::1"}
+{"timestamp":"2025-10-07T15:14:04.113Z","level":"WARN","message":"Security event: login_failed_user_not_found","event":"login_failed_user_not_found","email":"admin@erp-system.com","ip":"::1"}
+{"timestamp":"2025-10-07T15:14:52.607Z","level":"WARN","message":"Security event: login_failed_user_not_found","event":"login_failed_user_not_found","email":"biecoder@gmail.com","ip":"::1"}
