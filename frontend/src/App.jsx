@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Context
 import { AuthProvider } from './context/AuthContext';
+import { NotificationProvider } from './context/NotificationContext';
 
 // Components
 import PrivateRoute from './components/PrivateRoute';
@@ -26,7 +27,8 @@ import ProfileSettings from './pages/ProfileSettings';
 import SessionManagement from './pages/SessionManagement';
 import SystemHealth from './pages/SystemHealth';
 import AdminTools from './pages/AdminTools';
-import MFAManagement from './pages/MFAManagement'; // MFAManagement
+import MFAManagement from './pages/MFAManagement';
+import Notifications from './pages/Notifications';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -71,7 +73,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Router>
+        <NotificationProvider>
+          <Router>
           <div className="min-h-screen bg-gray-50">
             <Toaster
               position="top-right"
@@ -217,6 +220,17 @@ function App() {
                   </PrivateRoute>
                 }
               />
+
+              <Route
+                path="/notifications"
+                element={
+                  <PrivateRoute>
+                    <ProtectedLayout sidebarCollapsed={sidebarCollapsed} toggleSidebar={toggleSidebar}>
+                      <Notifications />
+                    </ProtectedLayout>
+                  </PrivateRoute>
+                }
+              />
               
               {/* Default redirect */}
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -226,6 +240,7 @@ function App() {
             </Routes>
           </div>
         </Router>
+        </NotificationProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

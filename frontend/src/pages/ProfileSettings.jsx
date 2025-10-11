@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom';
 import { 
   User, 
   Shield, 
@@ -25,10 +26,24 @@ import QRCode from 'qrcode';
  * Comprehensive user profile management and security settings
  */
 const ProfileSettings = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('profile');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   const queryClient = useQueryClient();
+
+  // Handle URL tab parameter
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab && ['profile', 'security', 'sessions'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setSearchParams({ tab });
+  };
 
   // Fetch user profile
   const { data: profileData, isLoading: profileLoading } = useQuery({
@@ -156,7 +171,7 @@ const ProfileSettings = () => {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center ${
                   activeTab === tab.id
                     ? 'border-blue-500 text-blue-600'

@@ -1,6 +1,7 @@
-import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useNotifications } from '../../context/NotificationContext';
 import { clsx } from 'clsx';
 import {
   LayoutDashboard,
@@ -14,6 +15,9 @@ import {
   User,
   Bell,
   HelpCircle,
+  Activity,
+  Smartphone,
+  Key,
 } from 'lucide-react';
 
 /**
@@ -23,7 +27,10 @@ import {
 
 const Sidebar = ({ isCollapsed, onToggle }) => {
   const { user, logout, hasRole } = useAuth();
+  const { unreadCount } = useNotifications();
   const location = useLocation();
+  const navigate = useNavigate();
+  const [showNotificationsDropdown, setShowNotificationsDropdown] = useState(false);
 
   const menuItems = [
     {
@@ -51,27 +58,34 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
       roles: ['admin', 'auditor'],
     },
     {
+      name: 'Notifications',
+      href: '/notifications',
+      icon: Bell,
+      roles: ['admin', 'manager', 'hr', 'user'],
+      badge: unreadCount > 0 ? unreadCount : null,
+    },
+    {
       name: 'MFA Management',
       href: '/mfa-management',
-      icon: Shield,
+      icon: Key,
       roles: ['admin', 'manager', 'hr', 'user'],
     },
     {
       name: 'Session Management',
       href: '/session-management',
-      icon: Shield,
+      icon: Smartphone,
       roles: ['admin', 'manager', 'hr', 'user'],
     },
     {
       name: 'System Health',
       href: '/system-health',
-      icon: Shield,
+      icon: Activity,
       roles: ['admin'],
     },
     {
       name: 'Admin Tools',
       href: '/admin-tools',
-      icon: Shield,
+      icon: Settings,
       roles: ['admin'],
     },
     {
@@ -151,7 +165,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
               key={item.name}
               to={item.href}
               className={clsx(
-                'flex items-center px-3 py-2 rounded-lg transition-colors group',
+                'flex items-center px-3 py-2 rounded-lg transition-colors group relative',
                 isActive
                   ? 'bg-blue-600 text-white'
                   : 'text-gray-300 hover:bg-gray-700 hover:text-white'
@@ -160,31 +174,28 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
             >
               <Icon className={clsx('h-5 w-5', isCollapsed ? '' : 'mr-3')} />
               {!isCollapsed && (
-                <span className="text-sm font-medium">{item.name}</span>
+                <span className="text-sm font-medium flex-1">{item.name}</span>
+              )}
+              
+              {/* Badge for notifications */}
+              {item.badge && item.badge > 0 && (
+                <span className={clsx(
+                  'inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full',
+                  isCollapsed ? 'absolute -top-1 -right-1' : 'ml-2'
+                )}>
+                  {item.badge > 99 ? '99+' : item.badge}
+                </span>
               )}
             </NavLink>
           );
         })}
+      </nav>
 
-        
       {/* Footer */}
       <div className="p-4 border-t border-gray-700 space-y-2">
-        {/* Notifications */}
-        <button
-          className={clsx(
-            'flex items-center px-3 py-2 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors w-full',
-            isCollapsed ? 'justify-center' : ''
-          )}
-          title={isCollapsed ? 'Notifications' : undefined}
-        >
-          <Bell className={clsx('h-5 w-5', isCollapsed ? '' : 'mr-3')} />
-          {!isCollapsed && (
-            <span className="text-sm font-medium">Notifications</span>
-          )}
-        </button>
-
         {/* Help */}
         <button
+          onClick={() => navigate('/help')}
           className={clsx(
             'flex items-center px-3 py-2 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors w-full',
             isCollapsed ? 'justify-center' : ''
@@ -212,7 +223,6 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
           )}
         </button>
       </div>
-      </nav>
 
     </div>
   );
