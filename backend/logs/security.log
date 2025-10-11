@@ -127,3 +127,13 @@
 {"timestamp":"2025-09-27T05:57:39.907Z","level":"WARN","message":"Security event: login_failed_invalid_password","event":"login_failed_invalid_password","userId":"cmfrx37f00009vzlc9nfkzk7m","email":"brwubet@gmail.com","ip":"::1"}
 {"timestamp":"2025-10-07T15:14:04.113Z","level":"WARN","message":"Security event: login_failed_user_not_found","event":"login_failed_user_not_found","email":"admin@erp-system.com","ip":"::1"}
 {"timestamp":"2025-10-07T15:14:52.607Z","level":"WARN","message":"Security event: login_failed_user_not_found","event":"login_failed_user_not_found","email":"biecoder@gmail.com","ip":"::1"}
+{"timestamp":"2025-10-11T09:12:14.615Z","level":"WARN","message":"Security event: login_failed_user_not_found","event":"login_failed_user_not_found","email":"briewubet1192@gmail.com","ip":"::1"}
+{"timestamp":"2025-10-11T09:12:27.378Z","level":"WARN","message":"Security event: login_failed_user_not_found","event":"login_failed_user_not_found","email":"briewubet1192@gmail.com","ip":"::1"}
+{"timestamp":"2025-10-11T09:13:02.434Z","level":"WARN","message":"Security event: login_failed_user_not_found","event":"login_failed_user_not_found","email":"briewubet1192@gmail.com","ip":"::1"}
+{"timestamp":"2025-10-11T09:13:23.721Z","level":"WARN","message":"Security event: login_failed_user_not_found","event":"login_failed_user_not_found","email":"briewubet1192@gmail.com","ip":"::1"}
+{"timestamp":"2025-10-11T09:16:57.899Z","level":"WARN","message":"Security event: login_failed_user_not_found","event":"login_failed_user_not_found","email":"briewubet1192@gmail.com","ip":"::1"}
+{"timestamp":"2025-10-11T09:18:32.878Z","level":"WARN","message":"Security event: login_failed_invalid_password","event":"login_failed_invalid_password","userId":"cmg0au1x90001vzzk8lp7ucu8","email":"birhina784@gmail.com","ip":"::1"}
+{"timestamp":"2025-10-11T09:20:28.651Z","level":"WARN","message":"Security event: login_failed_invalid_password","event":"login_failed_invalid_password","userId":"cmg0au1x90001vzzk8lp7ucu8","email":"birhina784@gmail.com","ip":"::1"}
+{"timestamp":"2025-10-11T09:27:21.257Z","level":"WARN","message":"Security event: login_failed_invalid_password","event":"login_failed_invalid_password","userId":"cmg0au1x90001vzzk8lp7ucu8","email":"birhina784@gmail.com","ip":"::1"}
+{"timestamp":"2025-10-11T09:27:32.909Z","level":"WARN","message":"Security event: login_failed_invalid_password","event":"login_failed_invalid_password","userId":"cmg0au1x90001vzzk8lp7ucu8","email":"birhina784@gmail.com","ip":"::1"}
+{"timestamp":"2025-10-11T09:28:07.040Z","level":"WARN","message":"Security event: login_failed_invalid_password","event":"login_failed_invalid_password","userId":"cmg0au1x90001vzzk8lp7ucu8","email":"birhina784@gmail.com","ip":"::1"}
